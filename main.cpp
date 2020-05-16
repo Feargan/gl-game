@@ -2,7 +2,6 @@
 
 #include "scene.h"
 #include "cylinder.h"
-#include "testobj.h"
 #include "surface.h"
 #include "cuboid.h"
 #include "lantern.h"
