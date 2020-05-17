@@ -1,5 +1,6 @@
 /* BASED ON
 https://www.opengl.org/archives/resources/code/samples/win32_tutorial/?fbclid=IwAR2L7sC8f9wnFPJCOEL0i_J7Yyc0u0jdwW28t9YkHjwLo3jVyY_X6EeQydE
+Code Samples released by SGI with the OpenGL 1.1 distribution in 1997.
 */
 
 #include "glwindow.h"
@@ -233,6 +234,13 @@ LRESULT CGlWindow::windowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_PAINT:
 		if (!m_scene)
 			return 0;
+		
+		//glMatrixMode(GL_PROJECTION);
+		//glLoadIdentity();
+		//gluPerspective(180.0, 1.0, 100.0, 100.0);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		m_scene->camera();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		m_scene->render();
 		glFlush();

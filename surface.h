@@ -26,5 +26,7 @@ public:
 protected:
 	virtual void renderComponent() const override;
 	virtual void updateComponent() override;
+private:
+	void putVertexes(int i, int j) const;
 };
 

@@ -10,21 +10,22 @@ CCar::CCar()
 {
 	constexpr auto& p = g_carPhys;
 	// Kola i osie
-	createComponent<CCylinder>(CVec3d(0, 1, -p.tire), p.tire, p.tireRadius * 2 - 0.1);
-	createComponent<CCylinder>(CVec3d(0, 1, p.widthTires), p.tire, p.tireRadius * 2 - 0.1);
-	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, -p.tire), p.tire, p.tireRadius * 2 - 0.1);
-	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.widthTires), p.tire, p.tireRadius * 2 - 0.1);
-	createComponent<CCylinder>(CVec3d(0, 1, 0.0), p.widthTires, p.tireRadius / 3.0);
-	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, 0.0), p.widthTires, p.tireRadius / 3.0);
+	createComponent<CCylinder>(CVec3d(0, 1, 0), p.tire, p.tireRadius - 0.1);
+	createComponent<CCylinder>(CVec3d(0, 1, p.widthTires-p.tire), p.tire, p.tireRadius- 0.1);
+	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, 0), p.tire, p.tireRadius - 0.1);
+	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.widthTires-p.tire), p.tire, p.tireRadius - 0.1);
+
+	createComponent<CCylinder>(CVec3d(0, 1, p.tire), p.widthTires-2*p.tire, p.tireRadius / 6.0);
+	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.tire), p.widthTires-2*p.tire, p.tireRadius / 6.0);
 
 	// Swiatla
-	createComponent<CCuboid>(CVec3d(p.lengthTires + p.carFrontExt, 1.5, 0.4), CVec3d(0.1, 0.6, 0.3));
-	createComponent<CCuboid>(CVec3d(p.lengthTires + p.carFrontExt, 1.5, 3.5), CVec3d(0.1, 0.6, 0.3));
-	createComponent<CCuboid>(CVec3d(-p.carFrontExt - 0.1, 1.5, 3.5), CVec3d(0.1, 0.6, 0.3));
-	createComponent<CCuboid>(CVec3d(-p.carFrontExt - 0.1, 1.5, 0.4), CVec3d(0.1, 0.6, 0.3));
+	createComponent<CCuboid>(CVec3d(p.lengthTires + p.carFrontExt, 1.5, 0.4), CVec3d(0.6, 0.3, 0.1));
+	createComponent<CCuboid>(CVec3d(p.lengthTires + p.carFrontExt, 1.5, 3.0), CVec3d(0.6, 0.3, 0.1));
+	createComponent<CCuboid>(CVec3d(-p.carFrontExt - 0.1, 1.5, 3.0), CVec3d(0.6, 0.3, 0.1));
+	createComponent<CCuboid>(CVec3d(-p.carFrontExt - 0.1, 1.5, 0.4), CVec3d(0.6, 0.3, 0.1));
 
 	// Maska
-	createComponent<CCuboid>(CVec3d(3.4, p.baseHeight, 0.11), CVec3d(p.lengthTires - p.carFrontExt - 0.4, p.carWidth - 0.11, 0.1))
+	createComponent<CCuboid>(CVec3d(3.4, p.baseHeight, 0.11), CVec3d(p.carWidth - 0.11, 0.1, p.lengthTires - p.carFrontExt - 0.4))
 		->setColor(0.2, 0.1, 0.5);
 }
 

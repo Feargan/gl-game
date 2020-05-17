@@ -7,8 +7,14 @@
 
 class CScene
 {
+	CVec3d m_camera;
+	CVec3d m_lookAt;
+
 	std::vector<std::shared_ptr<ISceneObject>> m_objects;
 public:
+	CScene();
+	~CScene();
+
 	template<typename T, typename ...Cs>
 	std::shared_ptr<T> createObject(Cs... args)
 	{
@@ -20,11 +26,11 @@ public:
 
 	//void cameraForward();
 
+	void camera() const;
+	void move(double deep, double horizontal);
+
 	void update();
 
 	void render() const;
-
-	
-	// cameraForward .. 
 };
 

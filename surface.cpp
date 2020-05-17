@@ -66,45 +66,17 @@ void CSurface::renderComponent() const
 	glColor3d(m_color[0], m_color[1], m_color[2]);
 	for (int i = 0; i < m_sizeX - 1; i++) {
 		//if (m_gradientColor[0] != 2.0 && m_gradientColor[1] != 2.0 && m_gradientColor[2] != 2.0)
-			/*glColor3d(	m_color[0] * (1 - i / double(m_sizeX)) + i / double(m_sizeX) * m_gradientColor[0],
-						m_color[1] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[1],
-						m_color[2] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[2]	);*/
+	/*glColor3d(	m_color[0] * (1 - i / double(m_sizeX)) + i / double(m_sizeX) * m_gradientColor[0],
+				m_color[1] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[1],
+				m_color[2] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[2]	);*/
 		for (int j = 0; j < m_sizeY; j++) {
-			if (m_vertices[i][j].y > 0.5 || m_vertices[i + 1][j].y > 0.5)
-			{
-				glColor3d(m_color[0] * (1 - i / double(m_sizeX)) + i / double(m_sizeX) * m_gradientColor[0]*0.1,
-					m_color[1] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[1]*0.1,
-					m_color[2] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[2]*0.1);
-			}
-			else
-			{
-				glColor3d(m_color[0] * (1 - i / double(m_sizeX)) + i / double(m_sizeX) * m_gradientColor[0],
-					m_color[1] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[1],
-					m_color[2] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[2]);
-			}
-			//glColor3d((double)rand() / RAND_MAX, (double)rand() / RAND_MAX, (double)rand() / RAND_MAX);
-			glVertex3d(m_vertices[i][j].x, m_vertices[i][j].y, m_vertices[i][j].z);
-			glVertex3d(m_vertices[i + 1][j].x, m_vertices[i + 1][j].y, m_vertices[i + 1][j].z);
+			putVertexes(i, j);
 		}
 		i++;
 		if (i >= m_sizeX - 1)
 			break;
 		for (int j = m_sizeY-1; j >= 0; j--) {
-			if (m_vertices[i][j].y > 0.5 || m_vertices[i+1][j].y > 0.5)
-			{
-				glColor3d(m_color[0] * (1 - i / double(m_sizeX)) + i / double(m_sizeX) * m_gradientColor[0]*0.1,
-					m_color[1] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[1]*0.1,
-					m_color[2] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[2]*0.1);
-			}
-			else
-			{
-				glColor3d(m_color[0] * (1 - i / double(m_sizeX)) + i / double(m_sizeX) * m_gradientColor[0],
-					m_color[1] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[1],
-					m_color[2] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[2]);
-			}
-			//glColor3d((double)rand() / RAND_MAX, (double)rand() / RAND_MAX, (double)rand() / RAND_MAX);
-			glVertex3d(m_vertices[i][j].x, m_vertices[i][j].y, m_vertices[i][j].z);
-			glVertex3d(m_vertices[i + 1][j].x, m_vertices[i + 1][j].y, m_vertices[i + 1][j].z);
+			putVertexes(i, j);
 		}
 	}
 	glEnd();
@@ -112,4 +84,23 @@ void CSurface::renderComponent() const
 
 void CSurface::updateComponent()
 {
+}
+
+void CSurface::putVertexes(int i, int j) const
+{
+	if (m_vertices[i][j].y > 0.5 || m_vertices[i + 1][j].y > 0.5)
+	{
+		glColor3d(m_color[0] * (1 - i / double(m_sizeX)) + i / double(m_sizeX) * m_gradientColor[0] * 0.1,
+			m_color[1] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[1] * 0.1,
+			m_color[2] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[2] * 0.1);
+	}
+	else
+	{
+		glColor3d(m_color[0] * (1 - i / double(m_sizeX)) + i / double(m_sizeX) * m_gradientColor[0],
+			m_color[1] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[1],
+			m_color[2] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[2]);
+	}
+	//glColor3d((double)rand() / RAND_MAX, (double)rand() / RAND_MAX, (double)rand() / RAND_MAX);
+	glVertex3d(m_vertices[i][j].x, m_vertices[i][j].y, m_vertices[i][j].z);
+	glVertex3d(m_vertices[i + 1][j].x, m_vertices[i + 1][j].y, m_vertices[i + 1][j].z);
 }
