@@ -33,6 +33,8 @@ void ISceneObject::render() const
 	glPopMatrix();
 }
 
+// ... gettery i settery ...
+
 void ISceneObject::setPos(double x, double y, double z)
 {
 	m_pos = CVec3d(x, y, z);

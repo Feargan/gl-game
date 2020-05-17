@@ -21,6 +21,7 @@ public:
 
 	void setDistortion(double distortionUp, double distortionRight, double distortionDown, double distortionLeft);
 	void setColor(double red, double green, double blue);
+	void setGradient(double red, double green, double blue);
 	void createVertices();
 protected:
 	virtual void renderComponent() const override;

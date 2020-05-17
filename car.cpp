@@ -10,12 +10,12 @@ CCar::CCar()
 {
 	constexpr auto& p = g_carPhys;
 	// Kola i osie
-	createComponent<CCylinder>(CVec3d(0, 1, 0), p.tire, p.tireRadius * 2 - 0.1);
+	createComponent<CCylinder>(CVec3d(0, 1, -p.tire), p.tire, p.tireRadius * 2 - 0.1);
 	createComponent<CCylinder>(CVec3d(0, 1, p.widthTires), p.tire, p.tireRadius * 2 - 0.1);
-	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, 0), p.tire, p.tireRadius * 2 - 0.1);
+	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, -p.tire), p.tire, p.tireRadius * 2 - 0.1);
 	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.widthTires), p.tire, p.tireRadius * 2 - 0.1);
-	createComponent<CCylinder>(CVec3d(0, 1, p.tire / 2.0), p.widthTires, p.tireRadius / 3.0);
-	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.tire / 2.0), p.widthTires, p.tireRadius / 3.0);
+	createComponent<CCylinder>(CVec3d(0, 1, 0.0), p.widthTires, p.tireRadius / 3.0);
+	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, 0.0), p.widthTires, p.tireRadius / 3.0);
 
 	// Swiatla
 	createComponent<CCuboid>(CVec3d(p.lengthTires + p.carFrontExt, 1.5, 0.4), CVec3d(0.1, 0.6, 0.3));
@@ -221,9 +221,6 @@ void CCar::renderComponent() const
 		glVertex3d(x, y, p.carWidth);
 	}
 	glEnd();
-
-	////Prostopad³oœcian - Œwiat³a
-
 
 	//Karoseria
 	glColor3d(1.0, 0, 0);

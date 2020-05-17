@@ -41,11 +41,11 @@ void CCylinder::renderComponent() const
 	double x, y, alpha, wysTr = 0.25;
 	int i;
 	glBegin(GL_TRIANGLE_FAN);
-	glColor3d(1.0, 1.0, 1.0);
+	glColor3d(0.7, 0.7, 0.7);
 	glVertex3d(0, 0, 0);
 	for (alpha = 0; alpha <= 2 * M_PI; alpha += M_PI / 20.0)
 	{
-		glColor3d(0, 0, 0);
+		glColor3d(0.3, 0.3, 0.3);
 		x = m_radius * sin(alpha);
 		y = m_radius * cos(alpha);
 		glVertex3d(x, y, 0);
@@ -53,14 +53,14 @@ void CCylinder::renderComponent() const
 	glEnd();
 
 	glBegin(GL_TRIANGLE_STRIP);
-	glColor3d(0.5, 0.5, 0.5);
+	glColor3d(0.3, 0.3, 0.3);
 	for (i = 0; i < m_height / wysTr; i++)
 	{
 		for (alpha = 0.0; alpha <= 2 * M_PI; alpha += M_PI / 20.0)
 		{
 			x = m_radius * sin(alpha);
 			y = m_radius * cos(alpha);
-			//glColor3d(0, ((height / wysTr) - i) / (height / wysTr), i / (height / wysTr));
+			//glColor3d(0, ((m_height / wysTr) - i) / (m_height / wysTr), i / (m_height / wysTr));
 			glVertex3d(x, y, (i * wysTr));
 			glVertex3d(x, y, (i * wysTr) + wysTr);
 		}
@@ -68,11 +68,11 @@ void CCylinder::renderComponent() const
 	glEnd();
 
 	glBegin(GL_TRIANGLE_FAN);
-	glColor3d(1.0, 1.0, 1.0);
+	glColor3d(0.7, 0.7, 0.7);
 	glVertex3d(0, 0, m_height);
 	for (alpha = 0; alpha >= -2 * M_PI; alpha -= M_PI / 20.0)
 	{
-		glColor3d(0, 0, 0);
+		glColor3d(0.3, 0.3, 0.3);
 		x = m_radius * sin(alpha);
 		y = m_radius * cos(alpha);
 		glVertex3d(x, y, m_height);
