@@ -147,6 +147,7 @@
     <ClInclude Include="surface.h" />
     <ClInclude Include="trafficcone.h" />
     <ClInclude Include="vec3.h" />
+    <ClInclude Include="windowevent.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -7,9 +7,11 @@ Code Samples released by SGI with the OpenGL 1.1 distribution in 1997.
 
 
 std::unordered_map<HWND, CGlWindow*> CGlWindow::m_windows = {};
+constexpr int CGlWindow::MOUSE_TIMER;
 
 
-CGlWindow::CGlWindow(const char * title, int x, int y, int width, int height, int cmdShow) : m_scene(nullptr)
+CGlWindow::CGlWindow(const char * title, int x, int y, int width, int height, int cmdShow) 
+	: m_scene(nullptr), m_keyStates{0}
 {
 	m_hWnd = create(title, x, y, width, height, PFD_TYPE_RGBA, PFD_DOUBLEBUFFER);
 	if (!m_hWnd)
@@ -24,12 +26,19 @@ CGlWindow::CGlWindow(const char * title, int x, int y, int width, int height, in
 	m_windows[m_hWnd] = this;
 
 	ShowWindow(m_hWnd, cmdShow);
+
+	//SetTimer(m_hWnd, MOUSE_TIMER, 10, NULL);
 }
 
 CGlWindow::~CGlWindow()
 {
 	m_windows.erase(m_hWnd);
 	destroy();
+}
+
+HWND CGlWindow::getHandle()
+{
+	return m_hWnd;
 }
 
 void CGlWindow::attachScene(CScene & scene)
@@ -53,8 +62,22 @@ bool CGlWindow::pump()
 			return true;
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
-	}while (PeekMessage(&msg, m_hWnd, 0, 0, PM_REMOVE) == TRUE);
+	}while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) == TRUE);
 	return false;
+}
+
+bool CGlWindow::pollEvent(CWindowEvent & event)
+{
+	if (m_events.empty())
+		return false;
+	event = m_events.back();
+	m_events.pop();
+	return true;
+}
+
+bool CGlWindow::getKeyState(int key) const
+{
+	return key < 255 ? m_keyStates[key] : 0;
 }
 
 void CGlWindow::render()
@@ -221,15 +244,17 @@ LRESULT CGlWindow::windowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	uwaga, nie da sie obsluzyc WM_CREATE
 	*/
 	case WM_TIMER:
-		// mozna dodac addTimer czy cos
-		/*switch (wParam)
+		switch (wParam)
 		{
-		case 101:
-			obj->setYaw(obj->getYaw() + 1.0);
-			surf->setYaw(surf->getYaw() + 1.0);
-			
+		case MOUSE_TIMER:
+			if (GetCapture() == m_hWnd)
+			{
+				POINT p;
+				GetCursorPos(&p);
+
+			}
 			break;
-		}*/
+		}
 		break;
 	case WM_PAINT:
 		if (!m_scene)
@@ -264,33 +289,38 @@ LRESULT CGlWindow::windowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		return 0;
 
-	case WM_CHAR:
-		switch (wParam) {
-		case 27:			/* ESC key */
-			PostQuitMessage(0);
-			break;
+	case WM_KEYDOWN:
+		{
+			CWindowEvent e;
+			e.type = CWindowEvent::KEY_PRESS;
+			e.keyboard.key = wParam;
+			m_events.push(e);
+			m_keyStates[wParam & 0xff] = true;
 		}
-		return 0;
-
-	/*case WM_LBUTTONDOWN:
+		break;
+	case WM_KEYUP:
+		{
+			CWindowEvent e;
+			e.type = CWindowEvent::KEY_RELEASE;
+			e.keyboard.key = wParam;
+			m_events.push(e);
+			m_keyStates[wParam & 0xff] = false;
+		}
+		break;
+	case WM_ACTIVATE:
+		
+		break;
+	case WM_LBUTTONDOWN:
 	case WM_RBUTTONDOWN:
 		SetCapture(m_hWnd);
-		mx = LOWORD(lParam);
-		my = HIWORD(lParam);
-		if (uMsg == WM_LBUTTONDOWN)
-			state |= PAN;
-		if (uMsg == WM_RBUTTONDOWN)
-			state |= ROTATE;
-		return 0;
-
+		SetCursor(NULL);
+		break;
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
-		ReleaseCapture();
-		state = 0;
-		return 0;
-
+		//ReleaseCapture();
+		break;
 	case WM_MOUSEMOVE:
-		if (state) {
+		/*if (state) {
 			omx = mx;
 			omy = my;
 			mx = LOWORD(lParam);
@@ -299,8 +329,8 @@ LRESULT CGlWindow::windowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if (my & 1 << 15) my -= (1 << 16);
 			update(state, omx, mx, omy, my);
 			PostMessage(m_hWnd, WM_PAINT, 0, 0);
-		}
-		return 0;*/
+		}*/
+		return 0;
 
 	case WM_PALETTECHANGED:
 		if (m_hWnd == (HWND)wParam)
@@ -315,7 +345,9 @@ LRESULT CGlWindow::windowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 		}
 		return FALSE;
-
+	case WM_DESTROY:
+		destroy();
+		return 0;
 	case WM_CLOSE:
 		PostQuitMessage(0);
 		return 0;

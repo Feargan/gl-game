@@ -88,7 +88,7 @@ void CSurface::updateComponent()
 
 void CSurface::putVertexes(int i, int j) const
 {
-	if (m_vertices[i][j].y > 0.5 || m_vertices[i + 1][j].y > 0.5)
+	/*if (m_vertices[i][j].y > 0.5 || m_vertices[i + 1][j].y > 0.5)
 	{
 		glColor3d(m_color[0] * (1 - i / double(m_sizeX)) + i / double(m_sizeX) * m_gradientColor[0] * 0.1,
 			m_color[1] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[1] * 0.1,
@@ -99,8 +99,14 @@ void CSurface::putVertexes(int i, int j) const
 		glColor3d(m_color[0] * (1 - i / double(m_sizeX)) + i / double(m_sizeX) * m_gradientColor[0],
 			m_color[1] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[1],
 			m_color[2] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[2]);
-	}
+	}*/
+	glColor3d(m_color[0] * (1 - i / double(m_sizeX)) + i / double(m_sizeX) * m_gradientColor[0] * m_vertices[i][j].y,
+		m_color[1] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[1]*m_vertices[i][j].y,
+		m_color[2] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[2] * m_vertices[i][j].y);
 	//glColor3d((double)rand() / RAND_MAX, (double)rand() / RAND_MAX, (double)rand() / RAND_MAX);
 	glVertex3d(m_vertices[i][j].x, m_vertices[i][j].y, m_vertices[i][j].z);
+	glColor3d(m_color[0] * (1 - i / double(m_sizeX)) + i / double(m_sizeX) * m_gradientColor[0] * m_vertices[i+1][j].y,
+		m_color[1] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[1] * m_vertices[i+1][j].y,
+		m_color[2] * (1 - i / double(m_sizeX)) + i / (double(m_sizeX)) * m_gradientColor[2] * m_vertices[i+1][j].y);
 	glVertex3d(m_vertices[i + 1][j].x, m_vertices[i + 1][j].y, m_vertices[i + 1][j].z);
 }

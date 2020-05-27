@@ -39,6 +39,7 @@ public:
 	// operator*=
 	// operator*
 	// euclidian distance
+	// rotate???
 };
 
 using CVec3d = CVec3<double>;

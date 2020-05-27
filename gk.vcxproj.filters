@@ -77,5 +77,8 @@
     <ClInclude Include="glwindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="windowevent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

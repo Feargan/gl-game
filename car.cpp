@@ -6,14 +6,17 @@
 #include <GL/GL.h>
 #include <GL/GLU.h>
 
+static constexpr double maxAngle = 30.0;
+
 CCar::CCar()
+	: m_steerAngle(0.0)
 {
 	constexpr auto& p = g_carPhys;
 	// Kola i osie
 	createComponent<CCylinder>(CVec3d(0, 1, 0), p.tire, p.tireRadius - 0.1);
 	createComponent<CCylinder>(CVec3d(0, 1, p.widthTires-p.tire), p.tire, p.tireRadius- 0.1);
-	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, 0), p.tire, p.tireRadius - 0.1);
-	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.widthTires-p.tire), p.tire, p.tireRadius - 0.1);
+	m_leftTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, 0), p.tire, p.tireRadius - 0.1);
+	m_rightTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.widthTires-p.tire), p.tire, p.tireRadius - 0.1);
 
 	createComponent<CCylinder>(CVec3d(0, 1, p.tire), p.widthTires-2*p.tire, p.tireRadius / 6.0);
 	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.tire), p.widthTires-2*p.tire, p.tireRadius / 6.0);
@@ -31,6 +34,55 @@ CCar::CCar()
 
 CCar::~CCar()
 {
+}
+
+void CCar::setSteer(double angle)
+{
+	m_steerAngle = angle;
+	if (m_steerAngle > maxAngle)
+		m_steerAngle = maxAngle;
+	if (m_steerAngle < -maxAngle)
+		m_steerAngle = -maxAngle;
+	m_leftTire->setYaw(m_steerAngle);
+	m_rightTire->setYaw(m_steerAngle);
+}
+
+double CCar::getSteer() const
+{
+	return m_steerAngle;
+}
+
+void CCar::forward(double dist)
+{
+	const double th = getYaw()*M_PI / 180;
+	// use in-built  vec operators???
+	if (m_steerAngle != 0.0)
+	{
+		const double a = m_steerAngle / 180 * M_PI;
+		const double h = g_carPhys.lengthTires;
+		const double r = std::abs(h / sin(a)); // x ^, z >
+		const double dx = r * (sin(a + dist / r) - sin(a));
+		const double dz = r * (cos(a + dist / r) - cos(a));
+		setPos(getPos() + CVec3d{ dz * sin(th) + dx * cos(th), 0,  dz * cos(th) - dx * sin(th) });
+
+		if(m_steerAngle > 0.0)
+			setYaw(getYaw() + dist/ (M_PI*r) * 180);
+		else
+			setYaw(getYaw() - dist / (M_PI*r) * 180);
+	}
+	/*else if (m_steerAngle < 0.0)
+	{
+		const double h = g_carPhys.lengthTires;
+		const double r = -h / sin(a); // x ^, z >
+		const double nx = r * (sin(a + dist / r) - sin(a));
+		const double nz = r * (cos(a + dist / r) - cos(a));
+		//const double nx = r * (sin(-a - dist / r + M_PI) - sin(-a + M_PI));
+		//const double nz = r * (cos(-a - dist / r + M_PI) - cos(-a + M_PI));
+		setPos(getPos() + CVec3d{ nz*sin(th) + nx * cos(th), 0, nz*cos(th) - nx * sin(th) });
+		//setYaw(getYaw() - dist / (M_PI*r) * 180);
+	}*/
+	else
+		setPos(getPos() + CVec3d{ dist * cos(th), 0, - dist * sin(th) });
 }
 
 void CCar::renderComponent() const
@@ -183,7 +235,7 @@ void CCar::renderComponent() const
 
 	//Spód nad ko³ami
 	//Tylnie lewe
-	glColor3f(0.1, 0.1, 0.1);
+	glColor3d(0.1, 0.1, 0.1);
 	glBegin(GL_TRIANGLE_STRIP);
 	for (alpha = 0.0; alpha <= M_PI; alpha += M_PI / 16) {
 		x = p.tireRadius * cos(alpha);
@@ -193,7 +245,7 @@ void CCar::renderComponent() const
 	}
 	glEnd();
 	//Przednie lewe
-	glColor3f(0.1, 0.1, 0.1);
+	glColor3d(0.1, 0.1, 0.1);
 	glBegin(GL_TRIANGLE_STRIP);
 	for (alpha = 0.0; alpha <= M_PI; alpha += M_PI / 16) {
 		x = p.lengthTires + p.tireRadius * cos(alpha);
@@ -203,7 +255,7 @@ void CCar::renderComponent() const
 	}
 	glEnd();
 	//Tylnie prawe
-	glColor3f(0.1, 0.1, 0.1);
+	glColor3d(0.1, 0.1, 0.1);
 	glBegin(GL_TRIANGLE_STRIP);
 	for (alpha = 0.0; alpha <= M_PI; alpha += M_PI / 16) {
 		x = p.tireRadius * cos(alpha);
@@ -213,7 +265,7 @@ void CCar::renderComponent() const
 	}
 	glEnd();
 	//Przednie prawe
-	glColor3f(0.1, 0.1, 0.1);
+	glColor3d(0.1, 0.1, 0.1);
 	glBegin(GL_TRIANGLE_STRIP);
 	for (alpha = 0.0; alpha <= M_PI; alpha += M_PI / 16) {
 		x = p.lengthTires + p.tireRadius * cos(alpha);

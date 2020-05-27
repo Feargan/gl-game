@@ -40,6 +40,9 @@ void CCylinder::renderComponent() const
 	const double diameter = m_radius * 2;
 	double x, y, alpha, wysTr = 0.25;
 	int i;
+	
+	glPushMatrix();
+	glTranslated(0, 0, -m_height/2);
 	glBegin(GL_TRIANGLE_FAN);
 	glColor3d(0.7, 0.7, 0.7);
 	glVertex3d(0, 0, 0);
@@ -78,6 +81,7 @@ void CCylinder::renderComponent() const
 		glVertex3d(x, y, m_height);
 	}
 	glEnd();
+	glPopMatrix();
 }
 
 void CCylinder::updateComponent()

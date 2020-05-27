@@ -11,6 +11,7 @@ class CScene
 	CVec3d m_lookAt;
 
 	std::vector<std::shared_ptr<ISceneObject>> m_objects;
+
 public:
 	CScene();
 	~CScene();
@@ -27,6 +28,7 @@ public:
 	//void cameraForward();
 
 	void camera() const;
+	void follow(std::shared_ptr<ISceneObject>& obj, CVec3d offset = { 0, 0, -5.0 }); // pass by refernce? + template??
 	void move(double deep, double horizontal);
 
 	void update();

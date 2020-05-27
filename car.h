@@ -2,6 +2,8 @@
 
 #include "sceneobject.h"
 
+#include "cylinder.h"
+
 constexpr struct
 {
 	double
@@ -18,10 +20,17 @@ constexpr struct
 class CCar :
 	public ISceneObject
 {
+	double m_steerAngle;
+	std::shared_ptr<CCylinder> m_leftTire;
+	std::shared_ptr<CCylinder> m_rightTire;
+
 public:
 	CCar();
 	virtual ~CCar();
 
+	void setSteer(double angle);
+	double getSteer() const;
+	void forward(double dist);
 protected:
 	virtual void renderComponent() const override;
 	virtual void updateComponent() override;
