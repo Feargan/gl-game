@@ -21,7 +21,7 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 	//srand(time(NULL));
 	srand(0);
 
-	//PlaySoundA("bumbam.wav", NULL, SND_LOOP | SND_ASYNC);
+	PlaySoundA("bumbam.wav", NULL, SND_LOOP | SND_ASYNC);
 
 	CScene scene;
 
