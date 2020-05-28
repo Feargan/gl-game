@@ -42,16 +42,15 @@ void CCylinder::renderComponent() const
 	int i;
 	
 	glPushMatrix();
-	glTranslated(0, 0, -m_height/2);
 	glBegin(GL_TRIANGLE_FAN);
 	glColor3d(0.7, 0.7, 0.7);
-	glVertex3d(0, 0, 0);
+	glVertex3d(0, 0, -m_height/2);
 	for (alpha = 0; alpha <= 2 * M_PI; alpha += M_PI / 20.0)
 	{
 		glColor3d(0.3, 0.3, 0.3);
 		x = m_radius * sin(alpha);
 		y = m_radius * cos(alpha);
-		glVertex3d(x, y, 0);
+		glVertex3d(x, y, -m_height/2);
 	}
 	glEnd();
 
@@ -64,21 +63,21 @@ void CCylinder::renderComponent() const
 			x = m_radius * sin(alpha);
 			y = m_radius * cos(alpha);
 			//glColor3d(0, ((m_height / wysTr) - i) / (m_height / wysTr), i / (m_height / wysTr));
-			glVertex3d(x, y, (i * wysTr));
-			glVertex3d(x, y, (i * wysTr) + wysTr);
+			glVertex3d(x, y, (i * wysTr) - m_height/2);
+			glVertex3d(x, y, (i * wysTr) + wysTr - m_height/2);
 		}
 	}
 	glEnd();
 
 	glBegin(GL_TRIANGLE_FAN);
 	glColor3d(0.7, 0.7, 0.7);
-	glVertex3d(0, 0, m_height);
+	glVertex3d(0, 0, m_height/2);
 	for (alpha = 0; alpha >= -2 * M_PI; alpha -= M_PI / 20.0)
 	{
 		glColor3d(0.3, 0.3, 0.3);
 		x = m_radius * sin(alpha);
 		y = m_radius * cos(alpha);
-		glVertex3d(x, y, m_height);
+		glVertex3d(x, y, m_height/2);
 	}
 	glEnd();
 	glPopMatrix();

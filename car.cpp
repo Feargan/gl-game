@@ -13,22 +13,22 @@ CCar::CCar()
 {
 	constexpr auto& p = g_carPhys;
 	// Kola i osie
-	createComponent<CCylinder>(CVec3d(0, 1, 0), p.tire, p.tireRadius - 0.1);
-	createComponent<CCylinder>(CVec3d(0, 1, p.widthTires-p.tire), p.tire, p.tireRadius- 0.1);
-	m_leftTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, 0), p.tire, p.tireRadius - 0.1);
-	m_rightTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.widthTires-p.tire), p.tire, p.tireRadius - 0.1);
+	createComponent<CCylinder>(CVec3d(0, 1, -p.widthBetweenTires/2 + p.tireWidth / 2), p.tireWidth, p.tireRadius - 0.1);
+	createComponent<CCylinder>(CVec3d(0, 1, p.widthBetweenTires/2 + p.tireWidth / 2), p.tireWidth, p.tireRadius- 0.1);
+	m_leftTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, -p.widthBetweenTires/2 + p.tireWidth / 2), p.tireWidth, p.tireRadius - 0.1);
+	m_rightTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.widthBetweenTires/2 + p.tireWidth / 2), p.tireWidth, p.tireRadius - 0.1);
 
-	createComponent<CCylinder>(CVec3d(0, 1, p.tire), p.widthTires-2*p.tire, p.tireRadius / 6.0);
-	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.tire), p.widthTires-2*p.tire, p.tireRadius / 6.0);
+	createComponent<CCylinder>(CVec3d(0, 1, 0), p.widthBetweenTires-2*p.tireWidth, p.tireRadius / 6.0);
+	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, 0), p.widthBetweenTires-2*p.tireWidth, p.tireRadius / 6.0);
 
 	// Swiatla
-	createComponent<CCuboid>(CVec3d(p.lengthTires + p.carFrontExt, 1.5, 0.4), CVec3d(0.6, 0.3, 0.1));
-	createComponent<CCuboid>(CVec3d(p.lengthTires + p.carFrontExt, 1.5, 3.0), CVec3d(0.6, 0.3, 0.1));
-	createComponent<CCuboid>(CVec3d(-p.carFrontExt - 0.1, 1.5, 3.0), CVec3d(0.6, 0.3, 0.1));
-	createComponent<CCuboid>(CVec3d(-p.carFrontExt - 0.1, 1.5, 0.4), CVec3d(0.6, 0.3, 0.1));
+	createComponent<CCuboid>(CVec3d(p.lengthTires + p.carFrontExt, 1.5, p.carLeftSide + 0.3), CVec3d(0.6, 0.3, 0.1));
+	createComponent<CCuboid>(CVec3d(p.lengthTires + p.carFrontExt, 1.5, p.carRightSide - 0.3 - 0.6), CVec3d(0.6, 0.3, 0.1));
+	createComponent<CCuboid>(CVec3d(-p.carFrontExt - 0.1, 1.5, p.carRightSide - 0.3 - 0.6), CVec3d(0.6, 0.3, 0.1));
+	createComponent<CCuboid>(CVec3d(-p.carFrontExt - 0.1, 1.5, p.carLeftSide + 0.3), CVec3d(0.6, 0.3, 0.1));
 
 	// Maska
-	createComponent<CCuboid>(CVec3d(3.4, p.baseHeight, 0.11), CVec3d(p.carWidth - 0.11, 0.1, p.lengthTires - p.carFrontExt - 0.4))
+	createComponent<CCuboid>(CVec3d(3.4, p.baseHeight, p.carLeftSide), CVec3d(abs(p.carLeftSide) + p.carRightSide, 0.1, p.lengthTires - p.carFrontExt - 0.4))
 		->setColor(0.2, 0.1, 0.5);
 }
 
@@ -94,207 +94,207 @@ void CCar::renderComponent() const
 	//Lewe tylne ko這
 	glBegin(GL_TRIANGLE_FAN);
 	glColor3d(1.0, 0.0, 0);
-	glVertex3d(-p.tireRadius, 1 + p.tireRadius, 0.1);
+	glVertex3d(-p.tireRadius, 1 + p.tireRadius, p.carLeftSide);
 	for (alpha = 3 * M_PI / 2; alpha <= 2 * M_PI; alpha += M_PI / 20.0) {
 		x = p.tireRadius * sin(alpha);
 		y = p.tireRadius * cos(alpha);
-		glVertex3d(x, y + 1, 0.1);
+		glVertex3d(x, y + 1, p.carLeftSide);
 	}
 	glEnd();
 	glBegin(GL_TRIANGLE_FAN);
 	glColor3d(1.0, 0.0, 0);
-	glVertex3d(p.tireRadius, 1 + p.tireRadius, 0.1);
+	glVertex3d(p.tireRadius, 1 + p.tireRadius, p.carLeftSide);
 	for (alpha = 0.0; alpha <= M_PI / 2; alpha += M_PI / 20.0) {
 		x = p.tireRadius * sin(alpha);
 		y = p.tireRadius * cos(alpha);
-		glVertex3d(x, y + 1, 0.1);
+		glVertex3d(x, y + 1, p.carLeftSide);
 	}
 	glEnd();
 
 	//Prawe tylne ko這
 	glBegin(GL_TRIANGLE_FAN);
 	glColor3d(1.0, 0.0, 0);
-	glVertex3d(-p.tireRadius, 1 + p.tireRadius, p.carWidth);
+	glVertex3d(-p.tireRadius, 1 + p.tireRadius, p.carRightSide);
 	for (alpha = 3 * M_PI / 2; alpha <= 2 * M_PI; alpha += M_PI / 20.0) {
 		x = p.tireRadius * sin(alpha);
 		y = p.tireRadius * cos(alpha);
-		glVertex3d(x, y + 1, p.carWidth);
+		glVertex3d(x, y + 1, p.carRightSide);
 	}
 	glEnd();
 	glBegin(GL_TRIANGLE_FAN);
 	glColor3d(1.0, 0.0, 0);
-	glVertex3d(p.tireRadius, 1 + p.tireRadius, p.carWidth);
+	glVertex3d(p.tireRadius, 1 + p.tireRadius, p.carRightSide);
 	for (alpha = 0.0; alpha <= M_PI / 2; alpha += M_PI / 20.0) {
 		x = p.tireRadius * sin(alpha);
 		y = p.tireRadius * cos(alpha);
-		glVertex3d(x, y + 1, p.carWidth);
+		glVertex3d(x, y + 1, p.carRightSide);
 	}
 	glEnd();
 
 	//Lewe przednie ko這
 	glBegin(GL_TRIANGLE_FAN);
 	glColor3d(1.0, 0.0, 0);
-	glVertex3d(p.lengthTires - p.tireRadius, 1 + p.tireRadius, 0.1);
+	glVertex3d(p.lengthTires - p.tireRadius, 1 + p.tireRadius, p.carLeftSide);
 	for (alpha = 3 * M_PI / 2; alpha <= 2 * M_PI; alpha += M_PI / 20.0) {
 		x = p.tireRadius * sin(alpha);
 		y = p.tireRadius * cos(alpha);
-		glVertex3d(x + p.lengthTires, y + 1, 0.1);
+		glVertex3d(x + p.lengthTires, y + 1, p.carLeftSide);
 	}
 	glEnd();
 	glBegin(GL_TRIANGLE_FAN);
 	glColor3d(1.0, 0.0, 0);
-	glVertex3d(p.lengthTires + p.tireRadius, 1 + p.tireRadius, 0.1);
+	glVertex3d(p.lengthTires + p.tireRadius, 1 + p.tireRadius, p.carLeftSide);
 	for (alpha = 0.0; alpha <= M_PI / 2; alpha += M_PI / 20.0) {
 		x = p.tireRadius * sin(alpha);
 		y = p.tireRadius * cos(alpha);
-		glVertex3d(x + p.lengthTires, y + 1, 0.1);
+		glVertex3d(x + p.lengthTires, y + 1, p.carLeftSide);
 	}
 	glEnd();
 
 	//Prawe przednie ko這
 	glBegin(GL_TRIANGLE_FAN);
 	glColor3d(1.0, 0.0, 0);
-	glVertex3d(p.lengthTires - p.tireRadius, 1 + p.tireRadius, p.carWidth);
+	glVertex3d(p.lengthTires - p.tireRadius, 1 + p.tireRadius, p.carRightSide);
 	for (alpha = 3 * M_PI / 2; alpha <= 2 * M_PI; alpha += M_PI / 20.0) {
 		x = p.tireRadius * sin(alpha);
 		y = p.tireRadius * cos(alpha);
-		glVertex3d(x + p.lengthTires, y + 1, p.carWidth);
+		glVertex3d(x + p.lengthTires, y + 1, p.carRightSide);
 	}
 	glEnd();
 	glBegin(GL_TRIANGLE_FAN);
 	glColor3d(1.0, 0.0, 0);
-	glVertex3d(p.lengthTires + p.tireRadius, 1 + p.tireRadius, p.carWidth);
+	glVertex3d(p.lengthTires + p.tireRadius, 1 + p.tireRadius, p.carRightSide);
 	for (alpha = 0.0; alpha <= M_PI / 2; alpha += M_PI / 20.0) {
 		x = p.tireRadius * sin(alpha);
 		y = p.tireRadius * cos(alpha);
-		glVertex3d(x + p.lengthTires, y + 1, p.carWidth);
+		glVertex3d(x + p.lengthTires, y + 1, p.carRightSide);
 	}
 	glEnd();
 
 	//D馧 karoserii
 	//Lewa strona
 	glBegin(GL_TRIANGLE_STRIP);
-	glVertex3d(p.lengthTires + p.tireRadius, 1, 0.1);
-	glVertex3d(p.lengthTires + p.tireRadius, 1 + p.tireRadius, 0.1);
-	glVertex3d(p.lengthTires + p.carFrontExt, 1, 0.1);
-	glVertex3d(p.lengthTires + p.carFrontExt, p.baseHeight, 0.1);
-	glVertex3d(p.lengthTires, p.baseHeight, 0.1);
-	glVertex3d(p.lengthTires + p.tireRadius, 1 + p.tireRadius, 0.1);
-	glVertex3d(p.tireRadius, p.baseHeight, 0.1);
-	glVertex3d(p.tireRadius, 1 + p.tireRadius, 0.1);
-	glVertex3d(p.lengthTires - p.tireRadius, 1, 0.1);
-	glVertex3d(p.lengthTires - p.tireRadius, p.baseHeight, 0.1);
-	glVertex3d(p.tireRadius, 1, 0.1);
-	glVertex3d(p.tireRadius, p.baseHeight, 0.1);
-	glVertex3d(p.tireRadius, 1 + p.tireRadius, 0.1);
-	glVertex3d(-p.carFrontExt, p.baseHeight, 0.1);
-	glVertex3d(-p.carFrontExt, 1 + p.tireRadius, 0.1);
-	glVertex3d(-p.tireRadius, 1, 0.1);
-	glVertex3d(-p.carFrontExt, 1, 0.1);
-	glVertex3d(-p.tireRadius, p.baseHeight, 0.1);
-	glVertex3d(-p.carFrontExt, p.baseHeight, 0.1);
+	glVertex3d(p.lengthTires + p.tireRadius, 1, p.carLeftSide);
+	glVertex3d(p.lengthTires + p.tireRadius, 1 + p.tireRadius, p.carLeftSide);
+	glVertex3d(p.lengthTires + p.carFrontExt, 1, p.carLeftSide);
+	glVertex3d(p.lengthTires + p.carFrontExt, p.baseHeight, p.carLeftSide);
+	glVertex3d(p.lengthTires, p.baseHeight, p.carLeftSide);
+	glVertex3d(p.lengthTires + p.tireRadius, 1 + p.tireRadius, p.carLeftSide);
+	glVertex3d(p.tireRadius, p.baseHeight, p.carLeftSide);
+	glVertex3d(p.tireRadius, 1 + p.tireRadius, p.carLeftSide);
+	glVertex3d(p.lengthTires - p.tireRadius, 1, p.carLeftSide);
+	glVertex3d(p.lengthTires - p.tireRadius, p.baseHeight, p.carLeftSide);
+	glVertex3d(p.tireRadius, 1, p.carLeftSide);
+	glVertex3d(p.tireRadius, p.baseHeight, p.carLeftSide);
+	glVertex3d(p.tireRadius, 1 + p.tireRadius, p.carLeftSide);
+	glVertex3d(-p.carFrontExt, p.baseHeight, p.carLeftSide);
+	glVertex3d(-p.carFrontExt, 1 + p.tireRadius, p.carLeftSide);
+	glVertex3d(-p.tireRadius, 1, p.carLeftSide);
+	glVertex3d(-p.carFrontExt, 1, p.carLeftSide);
+	glVertex3d(-p.tireRadius, p.baseHeight, p.carLeftSide);
+	glVertex3d(-p.carFrontExt, p.baseHeight, p.carLeftSide);
 	glEnd();
 	//Prawa strona
 	//D馧 karoserii od lewej strony
 	glBegin(GL_TRIANGLE_STRIP);
-	glVertex3d(p.lengthTires + p.tireRadius, 1, p.carWidth);
-	glVertex3d(p.lengthTires + p.tireRadius, 1 + p.tireRadius, p.carWidth);
-	glVertex3d(p.lengthTires + p.carFrontExt, 1, p.carWidth);
-	glVertex3d(p.lengthTires + p.carFrontExt, p.baseHeight, p.carWidth);
-	glVertex3d(p.lengthTires, p.baseHeight, p.carWidth);
-	glVertex3d(p.lengthTires + p.tireRadius, 1 + p.tireRadius, p.carWidth);
-	glVertex3d(p.tireRadius, p.baseHeight, p.carWidth);
-	glVertex3d(p.tireRadius, 1 + p.tireRadius, p.carWidth);
-	glVertex3d(p.lengthTires - p.tireRadius, 1, p.carWidth);
-	glVertex3d(p.lengthTires - p.tireRadius, p.baseHeight, p.carWidth);
-	glVertex3d(p.tireRadius, 1, p.carWidth);
-	glVertex3d(p.tireRadius, p.baseHeight, p.carWidth);
-	glVertex3d(p.tireRadius, 1 + p.tireRadius, p.carWidth);
-	glVertex3d(-p.carFrontExt, p.baseHeight, p.carWidth);
-	glVertex3d(-p.carFrontExt, 1 + p.tireRadius, p.carWidth);
-	glVertex3d(-p.tireRadius, 1, p.carWidth);
-	glVertex3d(-p.carFrontExt, 1, p.carWidth);
-	glVertex3d(-p.tireRadius, p.baseHeight, p.carWidth);
-	glVertex3d(-p.carFrontExt, p.baseHeight, p.carWidth);
+	glVertex3d(p.lengthTires + p.tireRadius, 1, p.carRightSide);
+	glVertex3d(p.lengthTires + p.tireRadius, 1 + p.tireRadius, p.carRightSide);
+	glVertex3d(p.lengthTires + p.carFrontExt, 1, p.carRightSide);
+	glVertex3d(p.lengthTires + p.carFrontExt, p.baseHeight, p.carRightSide);
+	glVertex3d(p.lengthTires, p.baseHeight, p.carRightSide);
+	glVertex3d(p.lengthTires + p.tireRadius, 1 + p.tireRadius, p.carRightSide);
+	glVertex3d(p.tireRadius, p.baseHeight, p.carRightSide);
+	glVertex3d(p.tireRadius, 1 + p.tireRadius, p.carRightSide);
+	glVertex3d(p.lengthTires - p.tireRadius, 1, p.carRightSide);
+	glVertex3d(p.lengthTires - p.tireRadius, p.baseHeight, p.carRightSide);
+	glVertex3d(p.tireRadius, 1, p.carRightSide);
+	glVertex3d(p.tireRadius, p.baseHeight, p.carRightSide);
+	glVertex3d(p.tireRadius, 1 + p.tireRadius, p.carRightSide);
+	glVertex3d(-p.carFrontExt, p.baseHeight, p.carRightSide);
+	glVertex3d(-p.carFrontExt, 1 + p.tireRadius, p.carRightSide);
+	glVertex3d(-p.tireRadius, 1, p.carRightSide);
+	glVertex3d(-p.carFrontExt, 1, p.carRightSide);
+	glVertex3d(-p.tireRadius, p.baseHeight, p.carRightSide);
+	glVertex3d(-p.carFrontExt, p.baseHeight, p.carRightSide);
 	glEnd();
 
 	//Pokrycie spodu karoserii (g鏎a)
 	glBegin(GL_TRIANGLE_STRIP);
-	glVertex3d(-p.carFrontExt, 1, 0.1);
-	glVertex3d(-p.carFrontExt, p.baseHeight, 0.1);
-	glVertex3d(-p.carFrontExt, 1, p.carWidth);
-	glVertex3d(-p.carFrontExt, p.baseHeight, p.carWidth);
+	glVertex3d(-p.carFrontExt, 1, p.carLeftSide);
+	glVertex3d(-p.carFrontExt, p.baseHeight, p.carLeftSide);
+	glVertex3d(-p.carFrontExt, 1, p.carRightSide);
+	glVertex3d(-p.carFrontExt, p.baseHeight, p.carRightSide);
 
-	glVertex3d(-p.carFrontExt, p.baseHeight, 0.1);
-	glVertex3d(p.lengthTires + p.carFrontExt, p.baseHeight, p.carWidth);
-	glVertex3d(p.lengthTires + p.carFrontExt, p.baseHeight, 0.1);
+	glVertex3d(-p.carFrontExt, p.baseHeight, p.carLeftSide);
+	glVertex3d(p.lengthTires + p.carFrontExt, p.baseHeight, p.carRightSide);
+	glVertex3d(p.lengthTires + p.carFrontExt, p.baseHeight, p.carLeftSide);
 
-	glVertex3d(p.lengthTires + p.carFrontExt, 1, p.carWidth);
-	glVertex3d(p.lengthTires + p.carFrontExt, 1, 0.1);
+	glVertex3d(p.lengthTires + p.carFrontExt, 1, p.carRightSide);
+	glVertex3d(p.lengthTires + p.carFrontExt, 1, p.carLeftSide);
 	glEnd();
 
 	//Sp鏚 nad ko豉mi
 	//Tylnie lewe
 	glColor3d(0.1, 0.1, 0.1);
 	glBegin(GL_TRIANGLE_STRIP);
-	for (alpha = 0.0; alpha <= M_PI; alpha += M_PI / 16) {
+	for (alpha = 0.0; alpha <= M_PI; alpha += M_PI / 20) {
 		x = p.tireRadius * cos(alpha);
 		y = 1 + p.tireRadius * sin(alpha);
-		glVertex3d(x, y, 0.1);
-		glVertex3d(x, y, p.tire + 0.1);
+		glVertex3d(x, y, p.carLeftSide);
+		glVertex3d(x, y, p.tireWidth + p.carLeftSide);
 	}
 	glEnd();
 	//Przednie lewe
 	glColor3d(0.1, 0.1, 0.1);
 	glBegin(GL_TRIANGLE_STRIP);
-	for (alpha = 0.0; alpha <= M_PI; alpha += M_PI / 16) {
+	for (alpha = 0.0; alpha <= M_PI; alpha += M_PI / 20) {
 		x = p.lengthTires + p.tireRadius * cos(alpha);
 		y = 1 + p.tireRadius * sin(alpha);
-		glVertex3d(x, y, 0.1);
-		glVertex3d(x, y, p.tire + 0.1);
+		glVertex3d(x, y, p.carLeftSide);
+		glVertex3d(x, y, p.tireWidth + p.carLeftSide);
 	}
 	glEnd();
 	//Tylnie prawe
 	glColor3d(0.1, 0.1, 0.1);
 	glBegin(GL_TRIANGLE_STRIP);
-	for (alpha = 0.0; alpha <= M_PI; alpha += M_PI / 16) {
+	for (alpha = 0.0; alpha <= M_PI; alpha += M_PI / 20) {
 		x = p.tireRadius * cos(alpha);
 		y = 1 + p.tireRadius * sin(alpha);
-		glVertex3d(x, y, p.carWidth - p.tire);
-		glVertex3d(x, y, p.carWidth);
+		glVertex3d(x, y, p.carRightSide - p.tireWidth);
+		glVertex3d(x, y, p.carRightSide);
 	}
 	glEnd();
 	//Przednie prawe
 	glColor3d(0.1, 0.1, 0.1);
 	glBegin(GL_TRIANGLE_STRIP);
-	for (alpha = 0.0; alpha <= M_PI; alpha += M_PI / 16) {
+	for (alpha = 0.0; alpha <= M_PI; alpha += M_PI / 20) {
 		x = p.lengthTires + p.tireRadius * cos(alpha);
 		y = 1 + p.tireRadius * sin(alpha);
-		glVertex3d(x, y, p.carWidth - p.tire);
-		glVertex3d(x, y, p.carWidth);
+		glVertex3d(x, y, p.carRightSide - p.tireWidth);
+		glVertex3d(x, y, p.carRightSide);
 	}
 	glEnd();
 
 	//Karoseria
 	glColor3d(1.0, 0, 0);
 	glBegin(GL_TRIANGLE_STRIP);
-	glVertex3d(-p.carFrontExt, p.baseHeight, 0.1);
-	glVertex3d(0, p.top, 0.2);
-	glVertex3d(2, p.baseHeight, 0.1);
-	glVertex3d(2.5, p.top, 0.1);
-	glVertex3d(3.5, p.baseHeight, 0.1);
+	glVertex3d(-p.carFrontExt, p.baseHeight, p.carLeftSide + p.lean);
+	glVertex3d(0, p.top, p.carLeftSide + p.lean);
+	glVertex3d(2, p.baseHeight, p.carLeftSide);
+	glVertex3d(2.5, p.top, p.carLeftSide + p.lean);
+	glVertex3d(3.5, p.baseHeight, p.carLeftSide);
 
-	glVertex3d(2.5, p.top, p.carWidth - 0.1);
-	glVertex3d(3.5, p.baseHeight, p.carWidth);
-	glVertex3d(2.5, p.top, p.carWidth - 0.1);
-	glVertex3d(1, p.baseHeight, p.carWidth);
-	glVertex3d(0, p.top, p.carWidth - 0.1);
-	glVertex3d(-p.carFrontExt, p.baseHeight, p.carWidth);
-	glVertex3d(0, p.top, 0.2);
-	glVertex3d(-p.carFrontExt, p.baseHeight, 0.1);
-	glVertex3d(0, p.top, p.carWidth - 0.1);
-	glVertex3d(2.5, p.top, 0.1);
-	glVertex3d(2.5, p.top, p.carWidth - 0.1);
+	glVertex3d(2.5, p.top, p.carRightSide - p.lean);
+	glVertex3d(3.5, p.baseHeight, p.carRightSide);
+	glVertex3d(2.5, p.top, p.carRightSide - p.lean);
+	glVertex3d(1, p.baseHeight, p.carRightSide);
+	glVertex3d(0, p.top, p.carRightSide - p.lean);
+	glVertex3d(-p.carFrontExt, p.baseHeight, p.carRightSide);
+	glVertex3d(0, p.top, p.carLeftSide + p.lean);
+	glVertex3d(-p.carFrontExt, p.baseHeight, p.carLeftSide);
+	glVertex3d(0, p.top, p.carRightSide - p.lean);
+	glVertex3d(2.5, p.top, p.carLeftSide + p.lean);
+	glVertex3d(2.5, p.top, p.carRightSide - p.lean);
 	glEnd();
 }
 
