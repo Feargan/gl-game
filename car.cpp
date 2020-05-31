@@ -88,12 +88,11 @@ void CCar::tick(double elapsed)
 void CCar::forward(double dist)
 {
 	double th = getYaw()*M_PI / 180;
-	// use in-built  vec operators???
 	if (m_steerAngle != 0.0)
 	{
 		const double a = m_steerAngle / 180 * M_PI;
 		const double h = g_carPhys.lengthTires;
-		const double r = std::abs(h / sin(a)); // x ^, z >
+		const double r = std::abs(h / sin(a));
 		const double dx = r * (sin(a + dist / r) - sin(a));
 		const double dz = r * (cos(a + dist / r) - cos(a));
 		setPos(getPos() + CVec3d{ dx, 0.0, dz }.rotateY(th));

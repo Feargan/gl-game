@@ -24,9 +24,8 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 	
 	CScene scene;
 
-	auto obj = scene.createObject<CCar>();
-	obj->setPos(5.0, 0.0, -30.0);
-	std::shared_ptr<ISceneObject> car = obj;
+	auto car = scene.createObject<CCar>();
+	car->setPos(5.0, 0.0, -30.0);
 
 	auto surf = scene.createObject<CSurface>(50, 50);
 	surf->setDistortion(0.7, 0.3, 0.5, 0.4);
@@ -65,7 +64,6 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 	auto prevFrameTimer = now();
 	while (!window.pump())
 	{
-		// zamiast asynckeystate zaprogramowac kolejke zdarzen z inputa, ale to potem
 		CWindowEvent event;
 		while (window.pollEvent(event))
 		{
@@ -77,10 +75,10 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 					PostQuitMessage(0);
 					break;
 				case 'W':
-					obj->setForce(2000);
+					car->setForce(2000);
 					break;
 				case 'S':
-					obj->setForce(-2000.0);
+					car->setForce(-2000.0);
 					break;
 				case VK_RETURN:
 					MessageBoxA(window.getHandle(), "Enter", "test", 0);
@@ -92,7 +90,7 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 				{
 				case 'W':
 				case 'S':
-					obj->setForce(0.0);
+					car->setForce(0.0);
 					break;
 				}
 			}
@@ -116,28 +114,28 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 		}*/
 
 		auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now() - prevFrameTimer).count();
-		obj->tick(elapsed);
-		double steer = obj->getSteer();
+		car->tick(elapsed);
+		double steer = car->getSteer();
 		const double delta_steer = elapsed*0.04;
 		if (window.getKeyState('A') || window.getKeyState('D'))
 		{
 			if (window.getKeyState('A'))
-				obj->setSteer(steer + delta_steer);
+				car->setSteer(steer + delta_steer);
 			else
-				obj->setSteer(steer - delta_steer);
+				car->setSteer(steer - delta_steer);
 		}
 		else
 		{
 			if (steer > 0.0)
-				obj->setSteer(steer - delta_steer);
+				car->setSteer(steer - delta_steer);
 			else if (steer < 0.0)
-				obj->setSteer(steer + delta_steer);
+				car->setSteer(steer + delta_steer);
 
-			if (std::abs(obj->getSteer()) < 0.1)
-				obj->setSteer(0.0);
+			if (std::abs(car->getSteer()) < 0.1)
+				car->setSteer(0.0);
 		}
 		
-		auto dura = std::chrono::duration_cast<std::chrono::milliseconds>(now() - prevFrameTimer);
+		//auto dura = std::chrono::duration_cast<std::chrono::milliseconds>(now() - prevFrameTimer);
 		// kurde nie potrafie zrobic tego frame limitera x-D
 		//if(dura < frameDuration)
 		//	std::this_thread::sleep_for(frameDuration-dura);
