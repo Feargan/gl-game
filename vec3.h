@@ -82,11 +82,13 @@ public:
 		return pow(pow(d.x, p) + pow(d.y, p) + pow(d.z, p), 1.0 / p);
 	}
 
-	// rotate???
 
 	CVec3& rotateX(double a)
 	{
-		
+		T ny = y * cos(a) + z * sin(a);
+		T nz = z * cos(a) - y * sin(a);
+		y = ny;
+		z = nz;
 		return *this;
 	}
 

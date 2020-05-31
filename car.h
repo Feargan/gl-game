@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include "sceneobject.h"
 
 #include "cylinder.h"
@@ -28,6 +30,8 @@ class CCar :
 
 	std::shared_ptr<CCylinder> m_leftTire;
 	std::shared_ptr<CCylinder> m_rightTire;
+
+	std::array<std::shared_ptr<CCylinder>, 4> m_tires;
 public:
 	CCar();
 	virtual ~CCar();

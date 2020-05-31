@@ -18,11 +18,10 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 	constexpr double fps = 120.0;
 	constexpr std::chrono::duration<double, std::milli> frameDuration(1000/fps);
 
-	//srand(time(NULL));
 	srand(0);
 
 	//PlaySoundA("bumbam.wav", NULL, SND_LOOP | SND_ASYNC);
-
+	
 	CScene scene;
 
 	auto obj = scene.createObject<CCar>();
@@ -61,7 +60,6 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 
 	CGlWindow window("Test", 10, 10, 800, 600);
 	window.attachScene(scene);
-	std::shared_ptr<ISceneObject> x = obj;
 
 	auto now = std::chrono::high_resolution_clock::now;
 	auto prevFrameTimer = now();
@@ -100,7 +98,7 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 			}
 		}
 
-		if (window.getKeyState(VK_UP))
+		/*if (window.getKeyState(VK_UP))
 		{
 			scene.move(0.1, 0.0);
 		}
@@ -115,7 +113,7 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 		if (window.getKeyState(VK_RIGHT))
 		{
 			scene.move(0.0, 0.1);
-		}
+		}*/
 
 		auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now() - prevFrameTimer).count();
 		obj->tick(elapsed);

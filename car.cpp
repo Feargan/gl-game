@@ -13,10 +13,10 @@ CCar::CCar()
 {
 	constexpr auto& p = g_carPhys;
 	// Kola i osie
-	createComponent<CCylinder>(CVec3d(0, 1, -p.widthBetweenTires/2 + p.tireWidth / 2), p.tireWidth, p.tireRadius - 0.1);
-	createComponent<CCylinder>(CVec3d(0, 1, p.widthBetweenTires/2 + p.tireWidth / 2), p.tireWidth, p.tireRadius- 0.1);
-	m_leftTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, -p.widthBetweenTires/2 + p.tireWidth / 2), p.tireWidth, p.tireRadius - 0.1);
-	m_rightTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.widthBetweenTires/2 + p.tireWidth / 2), p.tireWidth, p.tireRadius - 0.1);
+	m_tires[0] = createComponent<CCylinder>(CVec3d(0, 1, -p.widthBetweenTires/2 + p.tireWidth / 2), p.tireWidth, p.tireRadius - 0.1);
+	m_tires[1] = createComponent<CCylinder>(CVec3d(0, 1, p.widthBetweenTires/2 + p.tireWidth / 2), p.tireWidth, p.tireRadius- 0.1);
+	m_tires[2] = m_leftTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, -p.widthBetweenTires/2 + p.tireWidth / 2), p.tireWidth, p.tireRadius - 0.1);
+	m_tires[3] = m_rightTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.widthBetweenTires/2 + p.tireWidth / 2), p.tireWidth, p.tireRadius - 0.1);
 
 	createComponent<CCylinder>(CVec3d(0, 1, 0), p.widthBetweenTires-2*p.tireWidth, p.tireRadius / 6.0);
 	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, 0), p.widthBetweenTires-2*p.tireWidth, p.tireRadius / 6.0);
@@ -105,6 +105,11 @@ void CCar::forward(double dist)
 	}
 	else
 		setPos(getPos() + CVec3d{ dist * cos(th), 0, - dist * sin(th) });
+
+	const double deltaRot = -dist / g_carPhys.tireRadius * 360.0;
+	
+	for (auto &p : m_tires)
+		p->setRoll(p->getRoll() + deltaRot);
 }
 
 void CCar::renderComponent() const
