@@ -78,13 +78,29 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 				case VK_ESCAPE:
 					PostQuitMessage(0);
 					break;
+				case 'W':
+					obj->setForce(2000);
+					break;
+				case 'S':
+					obj->setForce(-2000.0);
+					break;
 				case VK_RETURN:
 					MessageBoxA(window.getHandle(), "Enter", "test", 0);
 				}
 			}
+			if (event.type == CWindowEvent::KEY_RELEASE)
+			{
+				switch (event.keyboard.key)
+				{
+				case 'W':
+				case 'S':
+					obj->setForce(0.0);
+					break;
+				}
+			}
 		}
 
-		/*if (window.getKeyState(VK_UP))
+		if (window.getKeyState(VK_UP))
 		{
 			scene.move(0.1, 0.0);
 		}
@@ -99,32 +115,36 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 		if (window.getKeyState(VK_RIGHT))
 		{
 			scene.move(0.0, 0.1);
-		}*/
-
-		scene.follow(car, {0.0, 5.0, -15.0});
-
-		// DODAC CHRONO TUTAJ -------> DELTA*ELAPSED
-		if (window.getKeyState('W'))
-		{
-			obj->forward(0.05);
 		}
-		if (window.getKeyState('S'))
-		{
-			obj->forward(-0.05);
-		}
+
+		auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now() - prevFrameTimer).count();
+		obj->tick(elapsed);
+		double steer = obj->getSteer();
+		const double delta_steer = elapsed*0.04;
 		if (window.getKeyState('A') || window.getKeyState('D'))
 		{
 			if (window.getKeyState('A'))
-				obj->setSteer(obj->getSteer() + 0.1);
+				obj->setSteer(steer + delta_steer);
 			else
-				obj->setSteer(obj->getSteer() - 0.1);
+				obj->setSteer(steer - delta_steer);
 		}
 		else
-			obj->setSteer(0.0);
+		{
+			if (steer > 0.0)
+				obj->setSteer(steer - delta_steer);
+			else if (steer < 0.0)
+				obj->setSteer(steer + delta_steer);
+
+			if (std::abs(obj->getSteer()) < 0.1)
+				obj->setSteer(0.0);
+		}
 		
-		auto dura = now() - prevFrameTimer - frameDuration;
-		if(dura.count() > 0)
-			std::this_thread::sleep_for(dura);
+		auto dura = std::chrono::duration_cast<std::chrono::milliseconds>(now() - prevFrameTimer);
+		// kurde nie potrafie zrobic tego frame limitera x-D
+		//if(dura < frameDuration)
+		//	std::this_thread::sleep_for(frameDuration-dura);
+
+		scene.follow(car, { -15.0, 5.0, 5.0 });
 		window.render();
 		prevFrameTimer = now();
 	}

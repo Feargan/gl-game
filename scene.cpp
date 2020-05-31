@@ -17,16 +17,15 @@ void CScene::camera() const
 	gluLookAt(m_camera.x, m_camera.y, m_camera.z, m_lookAt.x, m_lookAt.y, m_lookAt.z, 0.0, 1.0, 0.0);
 }
 
-void CScene::follow(std::shared_ptr<ISceneObject>& obj, CVec3d offset)
+/*void CScene::follow(std::shared_ptr<ISceneObject>& obj, const CVec3d& offset)
 {
-	// use in-built  vec operators???
 	m_lookAt = obj->getPos();
 	double yaw = obj->getYaw()*M_PI/180;
 	double pitch = obj->getPitch()*M_PI/180;
-	offset = { offset.x*sin(yaw) + offset.z*cos(yaw), offset.y,  offset.x*cos(yaw) - offset.z*sin(yaw) };
-	offset += m_lookAt;
 	m_camera = offset;
-}
+	m_camera.rotateY(yaw);
+	m_camera += m_lookAt;
+}*/
 
 void CScene::move(double deep, double horizontal)
 {

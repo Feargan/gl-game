@@ -41,7 +41,6 @@ void CCylinder::renderComponent() const
 	double x, y, alpha, wysTr = 0.25;
 	int i;
 	
-	glPushMatrix();
 	glBegin(GL_TRIANGLE_FAN);
 	glColor3d(0.7, 0.7, 0.7);
 	glVertex3d(0, 0, -m_height/2);
@@ -80,7 +79,6 @@ void CCylinder::renderComponent() const
 		glVertex3d(x, y, m_height/2);
 	}
 	glEnd();
-	glPopMatrix();
 }
 
 void CCylinder::updateComponent()

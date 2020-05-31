@@ -9,7 +9,7 @@
 static constexpr double maxAngle = 30.0;
 
 CCar::CCar()
-	: m_steerAngle(0.0)
+	: m_steerAngle(0.0), m_force(0.0), m_vel(0.0)
 {
 	constexpr auto& p = g_carPhys;
 	// Kola i osie
@@ -52,9 +52,42 @@ double CCar::getSteer() const
 	return m_steerAngle;
 }
 
+void CCar::setForce(double force)
+{
+	m_force = force;
+}
+
+double CCar::getForce() const
+{
+	return m_force;
+}
+
+void CCar::tick(double elapsed)
+{
+	constexpr double MAX_VEL = 20.0;
+	constexpr double MASS = 500.0;
+	const double FRICTION_FACTOR = 0.666;
+
+	const double res = elapsed / 1000;
+
+	m_vel += res * (m_force) / MASS;
+
+	if (m_force*m_vel <= 0)
+	{
+		m_vel -= m_vel * FRICTION_FACTOR*res;
+	}
+	if (m_vel > MAX_VEL)
+		m_vel = MAX_VEL;
+	if (m_vel < -MAX_VEL)
+		m_vel = -MAX_VEL;
+
+
+	forward(m_vel*res);
+}
+
 void CCar::forward(double dist)
 {
-	const double th = getYaw()*M_PI / 180;
+	double th = getYaw()*M_PI / 180;
 	// use in-built  vec operators???
 	if (m_steerAngle != 0.0)
 	{
@@ -63,24 +96,13 @@ void CCar::forward(double dist)
 		const double r = std::abs(h / sin(a)); // x ^, z >
 		const double dx = r * (sin(a + dist / r) - sin(a));
 		const double dz = r * (cos(a + dist / r) - cos(a));
-		setPos(getPos() + CVec3d{ dz * sin(th) + dx * cos(th), 0,  dz * cos(th) - dx * sin(th) });
+		setPos(getPos() + CVec3d{ dx, 0.0, dz }.rotateY(th));
 
 		if(m_steerAngle > 0.0)
 			setYaw(getYaw() + dist/ (M_PI*r) * 180);
 		else
 			setYaw(getYaw() - dist / (M_PI*r) * 180);
 	}
-	/*else if (m_steerAngle < 0.0)
-	{
-		const double h = g_carPhys.lengthTires;
-		const double r = -h / sin(a); // x ^, z >
-		const double nx = r * (sin(a + dist / r) - sin(a));
-		const double nz = r * (cos(a + dist / r) - cos(a));
-		//const double nx = r * (sin(-a - dist / r + M_PI) - sin(-a + M_PI));
-		//const double nz = r * (cos(-a - dist / r + M_PI) - cos(-a + M_PI));
-		setPos(getPos() + CVec3d{ nz*sin(th) + nx * cos(th), 0, nz*cos(th) - nx * sin(th) });
-		//setYaw(getYaw() - dist / (M_PI*r) * 180);
-	}*/
 	else
 		setPos(getPos() + CVec3d{ dist * cos(th), 0, - dist * sin(th) });
 }

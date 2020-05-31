@@ -23,18 +23,26 @@ class CCar :
 	public ISceneObject
 {
 	double m_steerAngle;
+	double m_vel;
+	double m_force;
+
 	std::shared_ptr<CCylinder> m_leftTire;
 	std::shared_ptr<CCylinder> m_rightTire;
-
 public:
 	CCar();
 	virtual ~CCar();
 
 	void setSteer(double angle);
 	double getSteer() const;
-	void forward(double dist);
+
+	void setForce(double force);
+	double getForce() const;
+
+	void tick(double elapsed);
 protected:
 	virtual void renderComponent() const override;
 	virtual void updateComponent() override;
+private:
+	void forward(double dist);
 };
 
