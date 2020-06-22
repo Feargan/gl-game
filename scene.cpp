@@ -12,6 +12,18 @@ CScene::~CScene()
 {
 }
 
+bool CScene::checkCollision(const ISceneObject & l) const
+{
+	for (auto &r : m_objects)
+	{
+		if (l.against(*r))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void CScene::camera() const
 {
 	gluLookAt(m_camera.x, m_camera.y, m_camera.z, m_lookAt.x, m_lookAt.y, m_lookAt.z, 0.0, 1.0, 0.0);

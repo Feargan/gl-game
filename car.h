@@ -5,6 +5,7 @@
 #include "sceneobject.h"
 
 #include "cylinder.h"
+#include "cuboid.h"
 
 constexpr struct
 {
@@ -30,6 +31,8 @@ class CCar :
 
 	std::shared_ptr<CCylinder> m_leftTire;
 	std::shared_ptr<CCylinder> m_rightTire;
+	std::shared_ptr<CCylinder> m_middleTire;
+	std::shared_ptr<CCuboid> m_tester;
 
 	std::array<std::shared_ptr<CCylinder>, 4> m_tires;
 public:
@@ -47,6 +50,6 @@ protected:
 	virtual void renderComponent() const override;
 	virtual void updateComponent() override;
 private:
-	void forward(double dist);
+	bool forward(double dist);
 };
 

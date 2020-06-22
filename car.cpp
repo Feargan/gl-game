@@ -1,10 +1,10 @@
 #include "car.h"
-#include "cuboid.h"
-#include "cylinder.h"
 
 #include <windows.h>
 #include <GL/GL.h>
 #include <GL/GLU.h>
+
+#include <cmath>
 
 static constexpr double maxAngle = 30.0;
 
@@ -18,6 +18,12 @@ CCar::CCar()
 	m_tires[2] = m_leftTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, -p.widthBetweenTires/2 + p.tireWidth / 2), p.tireWidth, p.tireRadius - 0.1);
 	m_tires[3] = m_rightTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.widthBetweenTires/2 + p.tireWidth / 2), p.tireWidth, p.tireRadius - 0.1);
 
+	m_middleTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.tireWidth / 2), p.tireWidth, p.tireRadius - 0.1);
+	m_tester = createComponent<CCuboid>();
+	m_tester->setPitch(-90);
+	m_tester->setSize(5, 0.01, 0.01);
+	m_tester->setColor(1.0, 0.0, 0.0);
+
 	createComponent<CCylinder>(CVec3d(0, 1, 0), p.widthBetweenTires-2*p.tireWidth, p.tireRadius / 6.0);
 	createComponent<CCylinder>(CVec3d(p.lengthTires, 1, 0), p.widthBetweenTires-2*p.tireWidth, p.tireRadius / 6.0);
 
@@ -30,6 +36,21 @@ CCar::CCar()
 	// Maska
 	createComponent<CCuboid>(CVec3d(3.4, p.baseHeight, p.carLeftSide), CVec3d(abs(p.carLeftSide) + p.carRightSide, 0.1, p.lengthTires - p.carFrontExt - 0.4))
 		->setColor(0.2, 0.1, 0.5);
+
+	addColSphere(CHitSphered(p.widthBetweenTires / 2, CVec3d(0, 0, 0)));
+	addColSphere(CHitSphered(p.widthBetweenTires / 2, CVec3d(p.lengthTires + p.carFrontExt - p.widthBetweenTires / 2, 0, 0)));
+	addColSphere(CHitSphered(p.widthBetweenTires / 2, CVec3d((p.lengthTires + p.carFrontExt - p.widthBetweenTires / 2)/2, 0, 0)));
+
+	auto col1 = createComponent<CCylinder>(CVec3d(0, 2.3, 0), 2.3, p.widthBetweenTires / 2);
+	auto col2 = createComponent<CCylinder>(CVec3d(p.lengthTires + p.carFrontExt - p.widthBetweenTires / 2, 2.3, 0), 2.3, p.widthBetweenTires / 2);
+	auto col3 = createComponent<CCylinder>(CVec3d((p.lengthTires + p.carFrontExt - p.widthBetweenTires / 2) / 2, 2.3, 0), 2.3, p.widthBetweenTires / 2);
+
+	for (auto &c : { col1, col2, col3 })
+	{
+		c->setPitch(-90);
+		c->setWireframe(true);
+	}
+
 }
 
 CCar::~CCar()
@@ -43,8 +64,15 @@ void CCar::setSteer(double angle)
 		m_steerAngle = maxAngle;
 	if (m_steerAngle < -maxAngle)
 		m_steerAngle = -maxAngle;
-	m_leftTire->setYaw(m_steerAngle);
-	m_rightTire->setYaw(m_steerAngle);
+	//m_leftTire->setYaw(m_steerAngle);
+	//m_rightTire->setYaw(m_steerAngle);
+	//m_middleTire->setYaw(m_steerAngle);
+	auto radAngle = m_steerAngle * M_PI / 180;
+	constexpr auto& p = g_carPhys;
+	//m_leftTire->setYaw(1.0/(180.0/m_steerAngle/M_PI - p.widthBetweenTires/p.lengthTires)*180/M_PI);
+	//m_rightTire->setYaw(1.0 / (180.0 / m_steerAngle / M_PI - p.widthBetweenTires / p.lengthTires) * 180 / M_PI);
+	m_leftTire->setYaw(atan(1.0 / (1.0 / tan(radAngle) - p.widthBetweenTires / 2.0 / p.lengthTires))*180/M_PI);
+	m_rightTire->setYaw(atan(1.0 / (1.0 / tan(radAngle) + p.widthBetweenTires / 2.0 / p.lengthTires)) * 180 / M_PI);
 }
 
 double CCar::getSteer() const
@@ -66,7 +94,7 @@ void CCar::tick(double elapsed)
 {
 	constexpr double MAX_VEL = 20.0;
 	constexpr double MASS = 500.0;
-	const double FRICTION_FACTOR = 0.666;
+	constexpr double FRICTION_FACTOR = 0.333;
 
 	const double res = elapsed / 1000;
 
@@ -74,7 +102,7 @@ void CCar::tick(double elapsed)
 
 	if (m_force*m_vel <= 0)
 	{
-		m_vel -= m_vel * FRICTION_FACTOR*res;
+		m_vel -= m_vel * (1.0-FRICTION_FACTOR)*res;
 	}
 	if (m_vel > MAX_VEL)
 		m_vel = MAX_VEL;
@@ -82,33 +110,35 @@ void CCar::tick(double elapsed)
 		m_vel = -MAX_VEL;
 
 
-	forward(m_vel*res);
+	if (forward(m_vel*res))
+		m_vel = 0.0;
 }
 
-void CCar::forward(double dist)
+bool CCar::forward(double dist)
 {
 	double th = getYaw()*M_PI / 180;
-	if (m_steerAngle != 0.0)
-	{
-		const double a = m_steerAngle / 180 * M_PI;
-		const double h = g_carPhys.lengthTires;
-		const double r = std::abs(h / sin(a));
-		const double dx = r * (sin(a + dist / r) - sin(a));
-		const double dz = r * (cos(a + dist / r) - cos(a));
-		setPos(getPos() + CVec3d{ dx, 0.0, dz }.rotateY(th));
+	const double a = m_steerAngle / 180 * M_PI;
+	constexpr double h = g_carPhys.lengthTires;
+	constexpr double w = g_carPhys.tireWidth;
+	const double r = (h / sin(a));
+	
 
-		if(m_steerAngle > 0.0)
-			setYaw(getYaw() + dist/ (M_PI*r) * 180);
-		else
-			setYaw(getYaw() - dist / (M_PI*r) * 180);
+	auto oldPos = getPos();
+	auto oldYaw = getYaw();
+	setPos(getPos() + CVec3d{ dist * cos(th), 0, -dist * sin(th) });
+	setYaw(getYaw() + dist / r * 180 / M_PI);
+	if (checkCollision())
+	{
+		setPos(oldPos);
+		setYaw(oldYaw);
+		return true;
 	}
-	else
-		setPos(getPos() + CVec3d{ dist * cos(th), 0, - dist * sin(th) });
 
 	const double deltaRot = -dist / g_carPhys.tireRadius * 360.0;
 	
 	for (auto &p : m_tires)
 		p->setRoll(p->getRoll() + deltaRot);
+	return false;
 }
 
 void CCar::renderComponent() const

@@ -80,5 +80,11 @@
     <ClInclude Include="windowevent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="hitsphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="observer_ptr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

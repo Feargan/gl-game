@@ -21,9 +21,12 @@ public:
 	{
 		static_assert(std::is_base_of<ISceneObject, T>::value, "T is not a scene object");
 		auto newObject = std::make_shared<T>(args...);
+		newObject->setScene(*this);
 		m_objects.push_back(newObject);
 		return newObject;
 	}
+
+	bool checkCollision(const ISceneObject& l) const;
 
 	//void cameraForward();
 

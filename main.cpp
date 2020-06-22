@@ -18,11 +18,15 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 	constexpr double fps = 120.0;
 	constexpr std::chrono::duration<double, std::milli> frameDuration(1000/fps);
 
+	double distance = 0;
+	constexpr auto& p = g_carPhys;
+
 	srand(0);
 
 	//PlaySoundA("bumbam.wav", NULL, SND_LOOP | SND_ASYNC);
 	
 	CScene scene;
+	bool frontCam = false;
 
 	auto car = scene.createObject<CCar>();
 	car->setPos(5.0, 0.0, -30.0);
@@ -57,6 +61,19 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 	auto cone4 = scene.createObject<CTrafficCone>();
 	cone4->setPos(6.0, 0.0, -20.0);
 
+	auto center = scene.createObject<CCuboid>();
+	center->setPos(20, 0, -10);
+
+	auto ri = scene.createObject<CCuboid>();
+	ri->setPitch(-90);
+	ri->setSize(5, 0.01, 0.01);
+	ri->setColor(1.0, 1.0, 0.0);
+
+	auto np = scene.createObject<CCuboid>();
+	np->setPitch(-90);
+	np->setSize(5, 0.01, 0.01);
+	np->setColor(0.0, 1.0, 1.0);
+
 	CGlWindow window("Test", 10, 10, 800, 600);
 	window.attachScene(scene);
 
@@ -82,6 +99,23 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 					break;
 				case VK_RETURN:
 					MessageBoxA(window.getHandle(), "Enter", "test", 0);
+					break;
+				case 'F':
+					frontCam = !frontCam;
+					break;
+				case 'G':
+					car->setYaw(car->getYaw() + 1);
+					break;
+				case 'H':
+					distance += 0.5;
+					break;
+				case 'J':
+					{
+						car->setYaw(car->getYaw() + 180 / M_PI * distance / (p.lengthTires / sin(car->getSteer() * M_PI / 180)));
+						CVec3d mt = CVec3d(p.lengthTires, 0.0, p.tireWidth / 2).rotateY(car->getYaw()*M_PI / 180);
+						car->setPos(np->getPos()-mt);
+					}
+					break;
 				}
 			}
 			if (event.type == CWindowEvent::KEY_RELEASE)
@@ -116,13 +150,16 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 		auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now() - prevFrameTimer).count();
 		car->tick(elapsed);
 		double steer = car->getSteer();
-		const double delta_steer = elapsed*0.04;
-		if (window.getKeyState('A') || window.getKeyState('D'))
+		const double delta_steer = elapsed*0.04; //0.04
+		if(window.getKeyState('A') || window.getKeyState('D'))
 		{
-			if (window.getKeyState('A'))
-				car->setSteer(steer + delta_steer);
-			else
-				car->setSteer(steer - delta_steer);
+			if (!window.getKeyState('A') || !window.getKeyState('D'))
+			{
+				if (window.getKeyState('A'))
+					car->setSteer(steer + delta_steer);
+				if (window.getKeyState('D'))
+					car->setSteer(steer - delta_steer);
+			}
 		}
 		else
 		{
@@ -134,13 +171,24 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 			if (std::abs(car->getSteer()) < 0.1)
 				car->setSteer(0.0);
 		}
-		
+
+		CVec3d rv = CVec3d(0, 0, -p.lengthTires / tan(car->getSteer() * M_PI / 180)+p.tireWidth/2).rotateY(car->getYaw()*M_PI/180);
+		ri->setPos(rv + car->getPos());
+		CVec3d mt = CVec3d(p.lengthTires, 0.0, p.tireWidth / 2).rotateY(car->getYaw()*M_PI / 180);
+		//np->setPos(mt + car->getPos());
+
+		np->setPos((mt - rv).rotateY(distance / (p.lengthTires / sin(car->getSteer() * M_PI / 180))) + car->getPos() + rv);
+
 		//auto dura = std::chrono::duration_cast<std::chrono::milliseconds>(now() - prevFrameTimer);
 		// kurde nie potrafie zrobic tego frame limitera x-D
 		//if(dura < frameDuration)
 		//	std::this_thread::sleep_for(frameDuration-dura);
-
-		scene.follow(car, { -15.0, 5.0, 5.0 });
+		//scene.follow(car, { -15.0, 5.0, 5.0 });
+		if(!frontCam)
+			scene.follow(car, { -15.0, 25.0, 5.0 });
+		else
+			scene.follow(car, { 15.0, 2.5, 0 });
+		scene.follow(center, { 0, 25, 1 });
 		window.render();
 		prevFrameTimer = now();
 	}

@@ -4,8 +4,10 @@
 #include <GL/GL.h>
 #include <GL/GLU.h>
 
-CLantern::CLantern() : m_height(15.0)
+CLantern::CLantern() 
+	: m_height(15.0)
 {
+	addColSphere({ 0.1 });
 }
 
 CLantern::~CLantern()

@@ -141,7 +141,9 @@
     <ClInclude Include="cuboid.h" />
     <ClInclude Include="cylinder.h" />
     <ClInclude Include="glwindow.h" />
+    <ClInclude Include="hitsphere.h" />
     <ClInclude Include="lantern.h" />
+    <ClInclude Include="observer_ptr.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="sceneobject.h" />
     <ClInclude Include="surface.h" />
