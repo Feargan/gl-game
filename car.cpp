@@ -71,8 +71,8 @@ void CCar::setSteer(double angle)
 	constexpr auto& p = g_carPhys;
 	//m_leftTire->setYaw(1.0/(180.0/m_steerAngle/M_PI - p.widthBetweenTires/p.lengthTires)*180/M_PI);
 	//m_rightTire->setYaw(1.0 / (180.0 / m_steerAngle / M_PI - p.widthBetweenTires / p.lengthTires) * 180 / M_PI);
-	m_leftTire->setYaw(atan(1.0 / (1.0 / tan(radAngle) - p.widthBetweenTires / 2.0 / p.lengthTires))*180/M_PI);
-	m_rightTire->setYaw(atan(1.0 / (1.0 / tan(radAngle) + p.widthBetweenTires / 2.0 / p.lengthTires)) * 180 / M_PI);
+	m_leftTire->setYaw(atan(1.0 / (1.0 / tan(radAngle) - (p.widthBetweenTires - p.tireWidth) / 2.0 / p.lengthTires))*180/M_PI);
+	m_rightTire->setYaw(atan(1.0 / (1.0 / tan(radAngle) + (p.widthBetweenTires - p.tireWidth) / 2.0 / p.lengthTires)) * 180 / M_PI);
 }
 
 double CCar::getSteer() const
