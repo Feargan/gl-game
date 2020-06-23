@@ -18,7 +18,7 @@ constexpr struct
 		baseHeight = 2,
 		top = 3.5,
 		carLeftSide = -widthBetweenTires/2 + 0.1,
-		carRightSide = widthBetweenTires/2 - 0.1 + tireWidth,
+		carRightSide = widthBetweenTires/2 - 0.1,
 		lean = 1.3;
 } g_carPhys;
 
