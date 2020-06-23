@@ -18,7 +18,7 @@ CCar::CCar()
 	m_tires[2] = m_leftTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, -p.widthBetweenTires/2 + p.tireWidth / 2), p.tireWidth, p.tireRadius - 0.1);
 	m_tires[3] = m_rightTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.widthBetweenTires/2 - p.tireWidth / 2), p.tireWidth, p.tireRadius - 0.1);
 
-	m_middleTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, p.tireWidth / 2), p.tireWidth, p.tireRadius - 0.1);
+	m_middleTire = createComponent<CCylinder>(CVec3d(p.lengthTires, 1, 0), p.tireWidth, p.tireRadius - 0.1);
 	m_tester = createComponent<CCuboid>();
 	m_tester->setPitch(-90);
 	m_tester->setSize(5, 0.01, 0.01);
@@ -66,7 +66,7 @@ void CCar::setSteer(double angle)
 		m_steerAngle = -maxAngle;
 	//m_leftTire->setYaw(m_steerAngle);
 	//m_rightTire->setYaw(m_steerAngle);
-	//m_middleTire->setYaw(m_steerAngle);
+	m_middleTire->setYaw(m_steerAngle);
 	auto radAngle = m_steerAngle * M_PI / 180;
 	constexpr auto& p = g_carPhys;
 	//m_leftTire->setYaw(1.0/(180.0/m_steerAngle/M_PI - p.widthBetweenTires/p.lengthTires)*180/M_PI);
@@ -116,17 +116,30 @@ void CCar::tick(double elapsed)
 
 bool CCar::forward(double dist)
 {
+	constexpr auto& p = g_carPhys;
 	double th = getYaw()*M_PI / 180;
 	const double a = m_steerAngle / 180 * M_PI;
 	constexpr double h = g_carPhys.lengthTires;
 	constexpr double w = g_carPhys.tireWidth;
 	const double r = (h / sin(a));
 	
-
 	auto oldPos = getPos();
 	auto oldYaw = getYaw();
-	setPos(getPos() + CVec3d{ dist * cos(th), 0, -dist * sin(th) });
-	setYaw(getYaw() + dist / r * 180 / M_PI);
+
+	if (std::abs(m_steerAngle) >= 0.1)
+	{
+		CVec3d rv = CVec3d(0, 0, -p.lengthTires / tan(m_steerAngle * M_PI / 180)).rotateY(oldYaw*M_PI / 180);
+		
+		CVec3d mt = CVec3d(m_middleTire->getPos()).rotateY(oldYaw*M_PI / 180);//CVec3d(p.lengthTires, 0.0, 0.0).rotateY(getYaw()*M_PI / 180);
+		CVec3d np = (mt - rv).rotateY(dist / (p.lengthTires / sin(m_steerAngle * M_PI / 180))) + oldPos + rv;
+		setYaw(oldYaw + 180 / M_PI * dist / (p.lengthTires / sin(m_steerAngle * M_PI / 180)));
+		mt = CVec3d(m_middleTire->getPos()).rotateY(getYaw()*M_PI / 180);//CVec3d(p.lengthTires, 0.0, 0.0).rotateY(getYaw()*M_PI / 180);
+		//CVec3d mt = CVec3d(p.lengthTires, 0.0, 0.0).rotateY(car->getYaw()*M_PI / 180);
+		setPos(np-mt);
+	}
+	else
+		setPos(getPos() + CVec3d{ dist * cos(th), 0, -dist * sin(th) });
+	//setYaw(getYaw() + dist / r * 180 / M_PI);
 	if (checkCollision())
 	{
 		setPos(oldPos);

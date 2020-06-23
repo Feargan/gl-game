@@ -26,7 +26,20 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 	//PlaySoundA("bumbam.wav", NULL, SND_LOOP | SND_ASYNC);
 	
 	CScene scene;
-	bool frontCam = false;
+
+	struct CamMode
+	{
+		enum
+		{
+			BEGIN = 1,
+			BACK = BEGIN,
+			FRONT,
+			FREE_TOP,
+			END = FREE_TOP,
+
+		};
+	};
+	int cameraMode = CamMode::BEGIN;
 
 	auto car = scene.createObject<CCar>();
 	car->setPos(5.0, 0.0, -30.0);
@@ -101,20 +114,7 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 					MessageBoxA(window.getHandle(), "Enter", "test", 0);
 					break;
 				case 'F':
-					frontCam = !frontCam;
-					break;
-				case 'G':
-					car->setYaw(car->getYaw() + 1);
-					break;
-				case 'H':
-					distance += 0.5;
-					break;
-				case 'J':
-					{
-						car->setYaw(car->getYaw() + 180 / M_PI * distance / (p.lengthTires / sin(car->getSteer() * M_PI / 180)));
-						CVec3d mt = CVec3d(p.lengthTires, 0.0, p.tireWidth / 2).rotateY(car->getYaw()*M_PI / 180);
-						car->setPos(np->getPos()-mt);
-					}
+					cameraMode = (cameraMode%CamMode::END)+1;
 					break;
 				}
 			}
@@ -168,27 +168,47 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 			else if (steer < 0.0)
 				car->setSteer(steer + delta_steer);
 
-			if (std::abs(car->getSteer()) < 0.1)
+			if (std::abs(car->getSteer()) <= delta_steer)
 				car->setSteer(0.0);
 		}
 
-		CVec3d rv = CVec3d(0, 0, -p.lengthTires / tan(car->getSteer() * M_PI / 180)+p.tireWidth/2).rotateY(car->getYaw()*M_PI/180);
+		CVec3d rv = CVec3d(0, 0, -p.lengthTires / tan(car->getSteer() * M_PI / 180)).rotateY(car->getYaw()*M_PI/180);
 		ri->setPos(rv + car->getPos());
-		CVec3d mt = CVec3d(p.lengthTires, 0.0, p.tireWidth / 2).rotateY(car->getYaw()*M_PI / 180);
-		//np->setPos(mt + car->getPos());
-
+		CVec3d mt = CVec3d(p.lengthTires, 0.0, 0.0).rotateY(car->getYaw()*M_PI / 180);
 		np->setPos((mt - rv).rotateY(distance / (p.lengthTires / sin(car->getSteer() * M_PI / 180))) + car->getPos() + rv);
 
 		//auto dura = std::chrono::duration_cast<std::chrono::milliseconds>(now() - prevFrameTimer);
 		// kurde nie potrafie zrobic tego frame limitera x-D
 		//if(dura < frameDuration)
 		//	std::this_thread::sleep_for(frameDuration-dura);
-		//scene.follow(car, { -15.0, 5.0, 5.0 });
-		if(!frontCam)
-			scene.follow(car, { -15.0, 25.0, 5.0 });
-		else
+
+		double elapsedSecs = elapsed / 1000.0;
+
+		elapsedSecs *= 4;
+		switch (cameraMode)
+		{
+		case CamMode::FRONT:
 			scene.follow(car, { 15.0, 2.5, 0 });
-		scene.follow(center, { 0, 25, 1 });
+			break;
+		case CamMode::BACK:
+			scene.follow(car, { -15.0, 5.0, 5.0 });
+			break;
+		case CamMode::FREE_TOP:
+			if (window.getKeyState('I'))
+				center->setPos(center->getPos() + CVec3d(0, 0, -elapsedSecs));
+			if (window.getKeyState('J'))
+				center->setPos(center->getPos() + CVec3d{ -elapsedSecs, 0, 0});
+			if (window.getKeyState('K'))
+				center->setPos(center->getPos() + CVec3d{ 0, 0, elapsedSecs });
+			if (window.getKeyState('L'))
+				center->setPos(center->getPos() + CVec3d{ elapsedSecs, 0, 0});
+
+			scene.follow(center, { 0, 25, 1 });
+			break;
+		default:
+			scene.follow(car, { 15.0, 2.5, 0 });
+		}
+		
 		window.render();
 		prevFrameTimer = now();
 	}
