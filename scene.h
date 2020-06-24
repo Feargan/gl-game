@@ -4,6 +4,7 @@
 #include <vector>
 #include <optional>
 
+#include "observer_ptr.h"
 #include "sceneobject.h"
 #include "box.h"
 
@@ -22,10 +23,10 @@ class CScene
 
 	struct CSectorRange
 	{
-		int sectorxBegin;
-		int sectorxEnd;
-		int sectorzBegin;
-		int sectorzEnd;
+		int xBegin;
+		int xEnd;
+		int zBegin;
+		int zEnd;
 	};
 public:
 	CScene();
@@ -58,7 +59,6 @@ public:
 	void render() const;
 
 	// bind/unbind
-	// removeStativeObject
 	void onCollisionUpdated(const ISceneObject& obj);
 	void onStativityChanged(const ISceneObject& obj);
 private:

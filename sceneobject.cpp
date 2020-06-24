@@ -1,9 +1,11 @@
 #include "sceneobject.h"
 #include "scene.h"
 
+#define NOMINMAX
 #include <windows.h>
 #include <GL/GL.h>
 #include <GL/GLU.h>
+#include <algorithm>
 
 
 ISceneObject::ISceneObject(CScene& scene, CVec3d pos, CVec3d rotation, bool stative)
@@ -49,38 +51,13 @@ void ISceneObject::updateCollision()
 {
 	if (!m_spheres.empty())
 	{
-		auto& first = m_spheres[0];
+
 		for (unsigned int i = 0; i < m_refSpheres.size(); i++)
 		{
 			auto newPos = CVec3d(m_refSpheres[i].pos);
 			newPos.rotateY(m_rotation.y / 180 * M_PI);
 			newPos.rotateX(m_rotation.x / 180 * M_PI);
 			newPos.rotateZ(m_rotation.z / 180 * M_PI);
-			
-
-			/*double
-				top{ m_worldTop.z - first.pos.z - first.r },
-				bottom{ m_worldTop.z - first.pos.z + first.r },
-				left{ m_worldTop.x - first.pos.x - first.r },
-				right{ m_worldTop.x - first.pos.x + first.r };
-
-			const CVec3d circle;
-			for (auto it = ++colSpheres.begin(); it != colSpheres.end(); ++it)
-			{
-				auto s = *it;
-				CVec3d relTopLeft = m_worldTop - s.pos - CVec3d{ s.r, 0.0, s.r };
-				CVec3d relBottomRight = m_worldTop - s.pos + CVec3d{ s.r, 0.0, s.r };
-
-				if (relTopLeft.z < top)
-					top = relTopLeft.z;
-				if (relBottomRight.z > bottom)
-					bottom = relBottomRight.z;
-				if (relTopLeft.x < left)
-					left = relTopLeft.x;
-				if (relBottomRight.x > right)
-					right = relBottomRight.x;
-			}*/
-
 			m_spheres[i].pos = newPos + m_pos;
 		}
 	}
@@ -178,6 +155,11 @@ void ISceneObject::addColSphere(const CHitSphered & sphere)
 {
 	m_refSpheres.push_back(sphere);
 	m_spheres.emplace_back(sphere.r);
+	auto maxTop = std::abs(std::max(sphere.pos.x + sphere.r, sphere.pos.z + sphere.r));
+	auto minBottom = std::abs(std::min(sphere.pos.x - sphere.r, sphere.pos.z - sphere.r));
+	auto maxPos = std::max(maxTop, minBottom);
+	m_approxHitbox.top = { maxPos, 0.0, maxPos };
+	m_approxHitbox.bottom = { -maxPos, 0.0, -maxPos };
 	updateCollision();
 }
 

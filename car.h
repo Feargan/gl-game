@@ -31,10 +31,8 @@ class CCar :
 
 	xstd::observer_ptr<CCylinder> m_leftTire;
 	xstd::observer_ptr<CCylinder> m_rightTire;
-	xstd::observer_ptr<CCylinder> m_middleTire;
-	xstd::observer_ptr<CCuboid> m_tester;
-
 	std::array<xstd::observer_ptr<CCylinder>, 4> m_tires;
+	const CVec3d m_middleTire;
 public:
 	CCar(CScene& scene);
 	virtual ~CCar();

@@ -139,6 +139,7 @@
     <ClCompile Include="trafficcone.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="box.h" />
     <ClInclude Include="car.h" />
     <ClInclude Include="cuboid.h" />
     <ClInclude Include="cylinder.h" />

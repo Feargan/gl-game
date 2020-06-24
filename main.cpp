@@ -80,15 +80,8 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 	auto center = scene.createObject<CCuboid>();
 	center->setPos(20, 0, -10);
 
-	/*auto ri = scene.createObject<CCuboid>();
-	ri->setPitch(-90);
-	ri->setSize(5, 0.01, 0.01);
-	ri->setColor(1.0, 1.0, 0.0);
-
-	auto np = scene.createObject<CCuboid>();
-	np->setPitch(-90);
-	np->setSize(5, 0.01, 0.01);
-	np->setColor(0.0, 1.0, 1.0);*/
+	//auto cuboid1 = scene.createObject<CCuboid>();
+	//auto cuboid2 = scene.createObject<CCuboid>();
 
 	CGlWindow window("Test", 10, 10, 800, 600);
 	window.attachScene(scene);
@@ -132,28 +125,10 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 				}
 			}
 		}
-
-		/*if (window.getKeyState(VK_UP))
-		{
-			scene.move(0.1, 0.0);
-		}
-		if (window.getKeyState(VK_DOWN))
-		{
-			scene.move(-0.1, 0.0);
-		}
-		if (window.getKeyState(VK_LEFT))
-		{
-			scene.move(0.0, -0.1);
-		}
-		if (window.getKeyState(VK_RIGHT))
-		{
-			scene.move(0.0, 0.1);
-		}*/
-
 		auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now() - prevFrameTimer).count();
 		car->tick(static_cast<int>(elapsed));
 		double steer = car->getSteer();
-		const double delta_steer = elapsed*0.04; //0.04
+		const double delta_steer = elapsed*0.04;
 		if(window.getKeyState('A') || window.getKeyState('D'))
 		{
 			if (!window.getKeyState('A') || !window.getKeyState('D'))
@@ -175,15 +150,9 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 				car->setSteer(0.0);
 		}
 
-		/*CVec3d rv = CVec3d(0, 0, -p.lengthTires / tan(car->getSteer() * M_PI / 180)).rotateY(car->getYaw()*M_PI/180);
-		ri->setPos(rv + car->getPos());
-		CVec3d mt = CVec3d(p.lengthTires, 0.0, 0.0).rotateY(car->getYaw()*M_PI / 180);
-		np->setPos((mt - rv).rotateY(distance / (p.lengthTires / sin(car->getSteer() * M_PI / 180))) + car->getPos() + rv);*/
-
-		//auto dura = std::chrono::duration_cast<std::chrono::milliseconds>(now() - prevFrameTimer);
-		// kurde nie potrafie zrobic tego frame limitera x-D
-		//if(dura < frameDuration)
-		//	std::this_thread::sleep_for(frameDuration-dura);
+		//auto& hb = car->getApproximatedHitbox();
+		//cuboid1->setPos(car->getPos() + hb.top);
+		//cuboid2->setPos(car->getPos() + hb.bottom);
 
 		double elapsedSecs = elapsed / 1000.0;
 

@@ -56,9 +56,9 @@ bool CScene::checkCollision(const ISceneObject & l) const
 		return false;
 	auto s = *sectors;
 
-	for (int i = s.sectorxBegin; i <= s.sectorxEnd; i++)
+	for (int i = s.xBegin; i <= s.xEnd; i++)
 	{
-		for (int j = s.sectorzBegin; j <= s.sectorzEnd; j++)
+		for (int j = s.zBegin; j <= s.zEnd; j++)
 		{
 			int ind = m_sectorsPerEdge * i + j;
 			if (ind < 0 || static_cast<unsigned int>(ind) >= m_sectors.size())
@@ -128,9 +128,9 @@ void CScene::onCollisionUpdated(const ISceneObject& obj)
 		return;
 	auto s = *sectors;
 
-	for (int i = s.sectorxBegin; i <= s.sectorxEnd; i++)
+	for (int i = s.xBegin; i <= s.xEnd; i++)
 	{
-		for (int j = s.sectorzBegin; j <= s.sectorzEnd; j++)
+		for (int j = s.zBegin; j <= s.zEnd; j++)
 		{
 			int ind = m_sectorsPerEdge * i + j;
 			if(ind >= 0 && static_cast<unsigned int>(ind) < m_sectors.size())
@@ -162,34 +162,12 @@ std::optional<CScene::CSectorRange> CScene::getObjSectors(const ISceneObject& ob
 	if (obj.getColSpheres().empty())
 		return {};
 	CSectorRange sectors;
-	auto& colSpheres = obj.getColSpheres();
-	auto& first = colSpheres[0];
-
-	double 
-		top{m_worldTop.z - first.pos.z - first.r}, 
-		bottom{m_worldTop.z - first.pos.z + first.r},
-		left{m_worldTop.x - first.pos.x - first.r},
-		right{m_worldTop.x - first.pos.x + first.r};
-
-	const CVec3d circle;
-	for (auto it = ++colSpheres.begin(); it!=colSpheres.end(); ++it)
-	{
-		auto s = *it;
-		CVec3d relTopLeft = m_worldTop - s.pos - CVec3d{ s.r, 0.0, s.r };
-		CVec3d relBottomRight = m_worldTop - s.pos + CVec3d{ s.r, 0.0, s.r };
-
-		if (relTopLeft.z < top)
-			top = relTopLeft.z;
-		if (relBottomRight.z > bottom)
-			bottom = relBottomRight.z;
-		if (relTopLeft.x < left)
-			left = relTopLeft.x;
-		if (relBottomRight.x > right)
-			right = relBottomRight.x;
-	}
-	sectors.sectorxBegin = static_cast<int>(m_worldSize.x / right);
-	sectors.sectorzBegin = static_cast<int>(m_worldSize.z / bottom);
-	sectors.sectorxEnd = static_cast<int>(m_worldSize.x / left);
-	sectors.sectorzEnd = static_cast<int>(m_worldSize.z / top);
+	auto& hb = obj.getApproximatedHitbox();
+	auto relBot = m_worldTop - (obj.getPos() + hb.bottom);
+	auto relTop = m_worldTop - (obj.getPos() + hb.top);
+	sectors.xBegin = static_cast<int>(m_worldSize.x / (relBot.x));
+	sectors.zBegin = static_cast<int>(m_worldSize.z / (relBot.z));
+	sectors.xEnd = static_cast<int>(m_worldSize.x / (relTop.x));
+	sectors.zEnd = static_cast<int>(m_worldSize.z / (relTop.z));
 	return sectors;
 }
