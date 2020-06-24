@@ -18,16 +18,17 @@ class ISceneObject
 	CVec3d m_pos;
 	CVec3d m_rotation;
 
-	std::vector<std::shared_ptr<ISceneObject>> m_children;
+	std::vector<std::unique_ptr<ISceneObject>> m_children;
 
 	std::vector<CHitSphered> m_refSpheres;
 	std::vector<CHitSphered> m_spheres;
 	
-	xstd::observer_ptr<const CScene> m_scene;
+	xstd::observer_ptr<CScene> m_scene;
 
 	bool m_wireframe;
+	bool m_stative;
 public:
-	ISceneObject(CVec3d pos = CVec3d(0.0, 0.0, 0.0), CVec3d rotation = CVec3d(0.0, 0.0, 0.0));
+	ISceneObject(CVec3d pos = CVec3d(0.0, 0.0, 0.0), CVec3d rotation = CVec3d(0.0, 0.0, 0.0), bool stative = false);
 	virtual ~ISceneObject();
 
 	ISceneObject(const ISceneObject& r);
@@ -52,14 +53,18 @@ public:
 	void setRoll(double roll);
 	double getRoll() const;
 
+	void setStative(bool stative);
+	bool isStative() const;
+
 	void setWireframe(bool wireframe);
 
-	void setScene(const CScene& scene);
+	void setScene(CScene& scene);
 	xstd::observer_ptr<const CScene> getScene() const;
 
 	void addColSphere(const CHitSphered& sphere);
 	bool against(const ISceneObject& r) const;
 	bool checkCollision() const;
+	const std::vector<CHitSphered>& getColSpheres() const;
 
 	void update();
 	void render() const;
@@ -68,12 +73,11 @@ protected:
 	virtual void renderComponent() const = 0;
 
 	template<typename T, typename ...Cs>
-	std::shared_ptr<T> createComponent(Cs... args)
+	xstd::observer_ptr<T> createComponent(Cs... args)
 	{
-		static_assert(std::is_base_of<ISceneObject, T>::value, "T is not a scene object");
-		auto newObject = std::make_shared<T>(args...);
-		m_children.push_back(newObject);
-		return newObject;
+		//static_assert(std::is_base_of<ISceneObject, T>::value, "T is not a scene object");
+		m_children.emplace_back(std::make_unique<T>(args...));
+		return static_cast<T*>(m_children.back().get());
 	}
 
 	void updateCollision();

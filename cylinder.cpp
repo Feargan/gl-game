@@ -6,7 +6,8 @@
 #include <GL/GL.h>
 #include <GL/GLU.h>
 
-CCylinder::CCylinder(CVec3d pos, double height, double radius, CVec3d rotation) : ISceneObject(pos, rotation), m_radius(radius), m_height(height)
+CCylinder::CCylinder(CVec3d pos, double height, double radius, CVec3d rotation)
+	: ISceneObject(pos, rotation, true), m_radius(radius), m_height(height)
 {
 	createComponent<CCuboid>()->setSize(30, 0.03, 0.03);
 }

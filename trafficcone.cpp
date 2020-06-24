@@ -4,8 +4,11 @@
 #include <GL/GL.h>
 #include <GL/GLU.h>
 
-CTrafficCone::CTrafficCone() : m_height(20.0), m_radius(0.3), m_color{ 1.0,0.7,0.0 }
+CTrafficCone::CTrafficCone() 
+	: ISceneObject(CVec3d(0.0, 0.0, 0.0), CVec3d(0.0, 0.0, 0.0), true),
+	m_height(20.0), m_radius(0.3), m_color{ 1.0,0.7,0.0 }
 {
+	addColSphere({ 0.1 });
 }
 
 CTrafficCone::~CTrafficCone()

@@ -6,18 +6,20 @@
 #include <GL/GLU.h>
 
 
-ISceneObject::ISceneObject(CVec3d pos, CVec3d rotation)
-	: m_pos(pos), m_rotation(rotation), m_scene(nullptr), m_wireframe(false)
+ISceneObject::ISceneObject(CVec3d pos, CVec3d rotation, bool stative)
+	: m_pos(pos), m_rotation(rotation), m_scene(nullptr), m_wireframe(false), m_stative(stative)
 {
+
 }
 
 ISceneObject::~ISceneObject()
 {
 }
 
-void ISceneObject::setScene(const CScene & scene)
+void ISceneObject::setScene(CScene & scene)
 {
 	m_scene = &scene;
+	updateCollision();
 }
 
 xstd::observer_ptr<const CScene> ISceneObject::getScene() const
@@ -59,6 +61,8 @@ void ISceneObject::updateCollision()
 		newPos.rotateZ(m_rotation.z / 180 * M_PI);
 		m_spheres[i].pos = newPos+m_pos;
 	}
+	if(m_scene)
+		m_scene->onObjectPosChanged(*this);
 }
 
 // ... gettery i settery ...
@@ -134,6 +138,17 @@ void ISceneObject::setWireframe(bool wireframe)
 	m_wireframe = wireframe;
 }
 
+void ISceneObject::setStative(bool stative)
+{
+	m_stative = stative;
+	updateCollision();
+}
+
+bool ISceneObject::isStative() const
+{
+	return m_stative;
+}
+
 void ISceneObject::addColSphere(const CHitSphered & sphere)
 {
 	m_refSpheres.push_back(sphere);
@@ -163,4 +178,9 @@ bool ISceneObject::checkCollision() const
 	if(!m_scene)
 		return false;
 	return m_scene->checkCollision(*this);
+}
+
+const std::vector<CHitSphered>& ISceneObject::getColSpheres() const
+{
+	return m_spheres;
 }

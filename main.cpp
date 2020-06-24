@@ -18,14 +18,13 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 	constexpr double fps = 120.0;
 	constexpr std::chrono::duration<double, std::milli> frameDuration(1000/fps);
 
-	double distance = 0;
-	constexpr auto& p = g_carPhys;
-
 	srand(0);
 
 	//PlaySoundA("bumbam.wav", NULL, SND_LOOP | SND_ASYNC);
 	
 	CScene scene;
+	scene.setWorldRegion(CVec3d(100, 100, 100), CVec3d(-100, -100, -100));
+	scene.setSectorsPerEdge(8);
 
 	struct CamMode
 	{
@@ -77,7 +76,7 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 	auto center = scene.createObject<CCuboid>();
 	center->setPos(20, 0, -10);
 
-	auto ri = scene.createObject<CCuboid>();
+	/*auto ri = scene.createObject<CCuboid>();
 	ri->setPitch(-90);
 	ri->setSize(5, 0.01, 0.01);
 	ri->setColor(1.0, 1.0, 0.0);
@@ -85,7 +84,7 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 	auto np = scene.createObject<CCuboid>();
 	np->setPitch(-90);
 	np->setSize(5, 0.01, 0.01);
-	np->setColor(0.0, 1.0, 1.0);
+	np->setColor(0.0, 1.0, 1.0);*/
 
 	CGlWindow window("Test", 10, 10, 800, 600);
 	window.attachScene(scene);
@@ -172,10 +171,10 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 				car->setSteer(0.0);
 		}
 
-		CVec3d rv = CVec3d(0, 0, -p.lengthTires / tan(car->getSteer() * M_PI / 180)).rotateY(car->getYaw()*M_PI/180);
+		/*CVec3d rv = CVec3d(0, 0, -p.lengthTires / tan(car->getSteer() * M_PI / 180)).rotateY(car->getYaw()*M_PI/180);
 		ri->setPos(rv + car->getPos());
 		CVec3d mt = CVec3d(p.lengthTires, 0.0, 0.0).rotateY(car->getYaw()*M_PI / 180);
-		np->setPos((mt - rv).rotateY(distance / (p.lengthTires / sin(car->getSteer() * M_PI / 180))) + car->getPos() + rv);
+		np->setPos((mt - rv).rotateY(distance / (p.lengthTires / sin(car->getSteer() * M_PI / 180))) + car->getPos() + rv);*/
 
 		//auto dura = std::chrono::duration_cast<std::chrono::milliseconds>(now() - prevFrameTimer);
 		// kurde nie potrafie zrobic tego frame limitera x-D
@@ -188,10 +187,10 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 		switch (cameraMode)
 		{
 		case CamMode::FRONT:
-			scene.follow(car, { 15.0, 2.5, 0 });
+			scene.follow(*car, { 15.0, 2.5, 0 });
 			break;
 		case CamMode::BACK:
-			scene.follow(car, { -15.0, 5.0, 5.0 });
+			scene.follow(*car, { -15.0, 5.0, 5.0 });
 			break;
 		case CamMode::FREE_TOP:
 			if (window.getKeyState('I'))
@@ -203,10 +202,10 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 			if (window.getKeyState('L'))
 				center->setPos(center->getPos() + CVec3d{ elapsedSecs, 0, 0});
 
-			scene.follow(center, { 0, 25, 1 });
+			scene.follow(*center, { 0, 25, 1 });
 			break;
 		default:
-			scene.follow(car, { 15.0, 2.5, 0 });
+			scene.follow(*car, { 15.0, 2.5, 0 });
 		}
 		
 		window.render();

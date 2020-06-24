@@ -29,12 +29,12 @@ class CCar :
 	double m_vel;
 	double m_force;
 
-	std::shared_ptr<CCylinder> m_leftTire;
-	std::shared_ptr<CCylinder> m_rightTire;
-	std::shared_ptr<CCylinder> m_middleTire;
-	std::shared_ptr<CCuboid> m_tester;
+	xstd::observer_ptr<CCylinder> m_leftTire;
+	xstd::observer_ptr<CCylinder> m_rightTire;
+	xstd::observer_ptr<CCylinder> m_middleTire;
+	xstd::observer_ptr<CCuboid> m_tester;
 
-	std::array<std::shared_ptr<CCylinder>, 4> m_tires;
+	std::array<xstd::observer_ptr<CCylinder>, 4> m_tires;
 public:
 	CCar();
 	virtual ~CCar();

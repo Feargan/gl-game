@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <optional>
 
 #include "sceneobject.h"
 
@@ -10,35 +11,49 @@ class CScene
 	CVec3d m_camera;
 	CVec3d m_lookAt;
 
-	std::vector<std::shared_ptr<ISceneObject>> m_objects;
+	std::vector<std::unique_ptr<ISceneObject>> m_objects;
 
+	std::vector<std::vector<xstd::observer_ptr <const ISceneObject>>> m_sectors;
+	int m_sectorsPerEdge;
+	CVec3d m_worldTop;
+	CVec3d m_worldBottom;
+
+	struct CSectorRange
+	{
+		int sectorxBegin;
+		int sectorxEnd;
+		int sectorzBegin;
+		int sectorzEnd;
+	};
 public:
 	CScene();
 	~CScene();
 
 	template<typename T, typename ...Cs>
-	std::shared_ptr<T> createObject(Cs... args)
+	xstd::observer_ptr<T> createObject(Cs... args)
 	{
-		static_assert(std::is_base_of<ISceneObject, T>::value, "T is not a scene object");
-		auto newObject = std::make_shared<T>(args...);
-		newObject->setScene(*this);
-		m_objects.push_back(newObject);
-		return newObject;
+		m_objects.emplace_back(std::make_unique<T>(args...));
+		m_objects.back()->setScene(*this);
+		return static_cast<T*>(m_objects.back().get());
 	}
 
 	bool checkCollision(const ISceneObject& l) const;
 
+	std::pair<CVec3d, CVec3d> getWorldRegion() const;
+	void setWorldRegion(const CVec3d& worldTop, const CVec3d& worldBottom);
+
+	int getSectorsPerEdge() const;
+	void setSectorsPerEdge(int sectorsPerEdge);
+
 	//void cameraForward();
 
 	void camera() const;
-	// EHH SHARED POINTERY TO CHYBA BYL ZLY POMYSL
-	template<typename T>
-	void follow(std::shared_ptr<T>& obj, const CVec3d& offset = { 0, 0, -5.0 })
+
+	void follow(const ISceneObject& obj, const CVec3d& offset = { 0, 0, -5.0 })
 	{
-		static_assert(std::is_base_of<ISceneObject, T>::value, "T is not a scene object");
-		m_lookAt = obj->getPos();
-		double yaw = obj->getYaw()*M_PI / 180;
-		double pitch = obj->getPitch()*M_PI / 180;
+		m_lookAt = obj.getPos();
+		double yaw = obj.getYaw()*M_PI / 180;
+		double pitch = obj.getPitch()*M_PI / 180;
 		m_camera = offset;
 		m_camera.rotateY(yaw);
 		m_camera += m_lookAt;
@@ -48,5 +63,14 @@ public:
 	void update();
 
 	void render() const;
+
+	// bind/unbind
+	// removeStativeObject
+	void removeStativeObject(const ISceneObject& obj);
+	void onObjectPosChanged(const ISceneObject& obj);
+private:
+	void recreateSectors();
+
+	std::optional<CSectorRange> getObjSectors(const ISceneObject& obj) const;
 };
 

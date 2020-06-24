@@ -1,27 +1,19 @@
 #include "scene.h"
+#include "hitsphere.h"
 
 #include <windows.h>
 #include <GL/GL.h>
 #include <GL/GLU.h>
+#include <algorithm>
+#include <array>
 
-CScene::CScene() : m_camera(20.0, 2.0, -10.0), m_lookAt(0.0, 0.0, 0.0)
+CScene::CScene() : m_camera(20.0, 2.0, -10.0), m_lookAt(0.0, 0.0, 0.0), m_sectorsPerEdge(1)
 {
+	recreateSectors();
 }
 
 CScene::~CScene()
 {
-}
-
-bool CScene::checkCollision(const ISceneObject & l) const
-{
-	for (auto &r : m_objects)
-	{
-		if (l.against(*r))
-		{
-			return true;
-		}
-	}
-	return false;
 }
 
 void CScene::camera() const
@@ -55,4 +47,145 @@ void CScene::render() const
 {
 	for (auto &p : m_objects)
 		p->render();
+}
+
+bool CScene::checkCollision(const ISceneObject & l) const
+{
+	auto sectors = getObjSectors(l);
+	if (!sectors)
+		return false;
+	auto s = *sectors;
+
+	for (int i = s.sectorxBegin; i <= s.sectorxEnd; i++)
+	{
+		for (int j = s.sectorzBegin; j <= s.sectorzEnd; j++)
+		{
+			int ind = m_sectorsPerEdge * i + j;
+			if (ind < 0 || static_cast<unsigned int>(ind) >= m_sectors.size())
+				continue;
+			for (auto &r : m_sectors[ind])
+			{
+				if (l.against(*r))
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+std::pair<CVec3d, CVec3d> CScene::getWorldRegion() const
+{
+	return { m_worldTop, m_worldBottom };
+}
+
+void CScene::setWorldRegion(const CVec3d& worldTop, const CVec3d& worldBottom)
+{
+	m_worldTop = worldTop;
+	m_worldBottom = worldBottom;
+	recreateSectors();
+}
+
+int CScene::getSectorsPerEdge() const
+{
+	return m_sectorsPerEdge;
+}
+
+void CScene::setSectorsPerEdge(int sectorsPerEdge)
+{
+	if (sectorsPerEdge <= 0)
+		return;
+
+	m_sectorsPerEdge = sectorsPerEdge;
+	recreateSectors();
+}
+
+void CScene::removeStativeObject(const ISceneObject& obj)
+{
+	for (auto &v : m_sectors)
+	{
+		v.erase(
+		std::remove_if(v.begin(), v.end(),
+		[&obj](xstd::observer_ptr<const ISceneObject> p)
+		{
+			//wtf error czy warning?discarding return value of function with 'nodiscard' attribute warning ale przez to moze byc bug jakis
+			return p == &obj;
+		}),v.end()
+		);
+	}
+}
+
+void CScene::onObjectPosChanged(const ISceneObject& obj)
+{
+	removeStativeObject(obj);
+
+	auto sectors = getObjSectors(obj);
+	if (!sectors)
+		return;
+	auto s = *sectors;
+
+	for (int i = s.sectorxBegin; i <= s.sectorxEnd; i++)
+	{
+		for (int j = s.sectorzBegin; j <= s.sectorzEnd; j++)
+		{
+			int ind = m_sectorsPerEdge * i + j;
+			if(ind >= 0 && ind < m_sectors.size())
+				m_sectors[ind].push_back(&obj);
+		}
+	}
+}
+
+void CScene::recreateSectors()
+{
+	m_sectors.clear();
+	m_sectors.resize(m_sectorsPerEdge*m_sectorsPerEdge);
+	// ^x, >z
+	// sector index: m_sectorsPerEdge*sector.x+sector.z gg
+	// relative: (objPos-worldBottom)
+	// world size: worldTop-worldBottom
+	// worldSize.x/relative.x == sector.x;
+	for (auto &p : m_objects)
+	{
+		if(p->isStative())
+			onObjectPosChanged(*p);
+	}
+}
+
+std::optional<CScene::CSectorRange> CScene::getObjSectors(const ISceneObject& obj) const
+{
+	if (obj.getColSpheres().empty())
+		return {};
+	CSectorRange sectors;
+	CVec3d worldSize = m_worldTop - m_worldBottom;
+	auto& colSpheres = obj.getColSpheres();
+	auto& first = colSpheres[0];
+
+	double 
+		top{m_worldTop.z - first.pos.z - first.r}, 
+		bottom{m_worldTop.z - first.pos.z + first.r},
+		left{m_worldTop.x - first.pos.x - first.r},
+		right{m_worldTop.x - first.pos.x + first.r};
+
+	for (auto it = ++colSpheres.begin(); it!=colSpheres.end(); ++it)
+	{
+		auto s = *it;
+		CVec3d relTopLeft = m_worldTop - s.pos - CVec3d{ s.r, 0.0, s.r };
+		CVec3d relBottomRight = m_worldTop - s.pos + CVec3d{ s.r, 0.0, s.r };
+
+		if (relTopLeft.z < top)
+			top = relTopLeft.z;
+		if (relBottomRight.z > bottom)
+			bottom = relBottomRight.z;
+		if (relTopLeft.x < left)
+			left = relTopLeft.x;
+		if (relBottomRight.x > right)
+			right = relBottomRight.x;
+	}
+	sectors.sectorxBegin = static_cast<int>(worldSize.x / right);
+	sectors.sectorzBegin = static_cast<int>(worldSize.z / bottom);
+	sectors.sectorxEnd = static_cast<int>(worldSize.x / left);
+	sectors.sectorzEnd = static_cast<int>(worldSize.z / top);
+
+	return sectors;
 }
