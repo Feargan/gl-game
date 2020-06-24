@@ -156,8 +156,8 @@ void ISceneObject::addColSphere(const CHitSphered & sphere)
 	m_refSpheres.push_back(sphere);
 	m_spheres.emplace_back(sphere.r);
 	auto maxTop = std::abs(std::max(sphere.pos.x + sphere.r, sphere.pos.z + sphere.r));
-	auto minBottom = std::abs(std::min(sphere.pos.x - sphere.r, sphere.pos.z - sphere.r));
-	auto maxPos = std::max(maxTop, minBottom);
+	auto minBottom = std::abs(std::min(-sphere.pos.x - sphere.r, -sphere.pos.z - sphere.r));
+	auto maxPos = std::max(std::max(maxTop, minBottom), m_approxHitbox.top.x);
 	m_approxHitbox.top = { maxPos, 0.0, maxPos };
 	m_approxHitbox.bottom = { -maxPos, 0.0, -maxPos };
 	updateCollision();
