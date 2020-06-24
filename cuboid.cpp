@@ -4,8 +4,8 @@
 #include <GL/GL.h>
 #include <GL/GLU.h>
 
-CCuboid::CCuboid(CVec3d pos, CVec3d size, CVec3d rotation) 
-	: ISceneObject(pos, rotation, true), m_size(size), m_color{1.0, 1.0, 1.0}
+CCuboid::CCuboid(CScene& scene, CVec3d pos, CVec3d size, CVec3d rotation) 
+	: ISceneObject(scene, pos, rotation, false), m_size(size), m_color{1.0, 1.0, 1.0}
 {
 }
 

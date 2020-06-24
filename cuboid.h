@@ -9,7 +9,7 @@ class CCuboid :
 
 	double m_color[3];
 public:
-	CCuboid(CVec3d pos = CVec3d(0.0, 0.0, 0.0), CVec3d size = CVec3d(1.0, 1.0, 1.0), CVec3d rotation = CVec3d(0.0, 0.0, 0.0));
+	CCuboid(CScene& scene, CVec3d pos = CVec3d(0.0, 0.0, 0.0), CVec3d size = CVec3d(1.0, 1.0, 1.0), CVec3d rotation = CVec3d(0.0, 0.0, 0.0));
 	virtual ~CCuboid();
 
 	void setSize(double width, double height, double length);

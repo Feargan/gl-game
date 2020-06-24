@@ -73,6 +73,10 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 	auto cone4 = scene.createObject<CTrafficCone>();
 	cone4->setPos(6.0, 0.0, -20.0);
 
+	auto cone5 = scene.createObject<CTrafficCone>();
+	cone5->setPos(0.0, 0.0, 25.0);
+	cone5->setPitch(-90);
+
 	auto center = scene.createObject<CCuboid>();
 	center->setPos(20, 0, -10);
 
@@ -147,7 +151,7 @@ int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst, LPSTR lpsz
 		}*/
 
 		auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now() - prevFrameTimer).count();
-		car->tick(elapsed);
+		car->tick(static_cast<int>(elapsed));
 		double steer = car->getSteer();
 		const double delta_steer = elapsed*0.04; //0.04
 		if(window.getKeyState('A') || window.getKeyState('D'))

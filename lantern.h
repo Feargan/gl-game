@@ -7,7 +7,7 @@ class CLantern :
 {
 	double m_height;
 public:
-	CLantern();
+	CLantern(CScene& scene);
 	virtual ~CLantern();
 
 	void setHeight(double height);

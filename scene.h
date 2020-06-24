@@ -5,6 +5,7 @@
 #include <optional>
 
 #include "sceneobject.h"
+#include "box.h"
 
 class CScene
 {
@@ -17,6 +18,7 @@ class CScene
 	int m_sectorsPerEdge;
 	CVec3d m_worldTop;
 	CVec3d m_worldBottom;
+	CVec3d m_worldSize;
 
 	struct CSectorRange
 	{
@@ -32,14 +34,13 @@ public:
 	template<typename T, typename ...Cs>
 	xstd::observer_ptr<T> createObject(Cs... args)
 	{
-		m_objects.emplace_back(std::make_unique<T>(args...));
-		m_objects.back()->setScene(*this);
+		m_objects.emplace_back(std::make_unique<T>(*this, args...));
 		return static_cast<T*>(m_objects.back().get());
 	}
 
 	bool checkCollision(const ISceneObject& l) const;
 
-	std::pair<CVec3d, CVec3d> getWorldRegion() const;
+	CBoxd getWorldRegion() const;
 	void setWorldRegion(const CVec3d& worldTop, const CVec3d& worldBottom);
 
 	int getSectorsPerEdge() const;
@@ -49,15 +50,7 @@ public:
 
 	void camera() const;
 
-	void follow(const ISceneObject& obj, const CVec3d& offset = { 0, 0, -5.0 })
-	{
-		m_lookAt = obj.getPos();
-		double yaw = obj.getYaw()*M_PI / 180;
-		double pitch = obj.getPitch()*M_PI / 180;
-		m_camera = offset;
-		m_camera.rotateY(yaw);
-		m_camera += m_lookAt;
-	}
+	void follow(const ISceneObject& obj, const CVec3d& offset = { 0, 0, -5.0 });
 	void move(double deep, double horizontal);
 
 	void update();
@@ -66,10 +59,11 @@ public:
 
 	// bind/unbind
 	// removeStativeObject
-	void removeStativeObject(const ISceneObject& obj);
-	void onObjectPosChanged(const ISceneObject& obj);
+	void onCollisionUpdated(const ISceneObject& obj);
+	void onStativityChanged(const ISceneObject& obj);
 private:
 	void recreateSectors();
+	void removeStativeObject(const ISceneObject& obj);
 
 	std::optional<CSectorRange> getObjSectors(const ISceneObject& obj) const;
 };

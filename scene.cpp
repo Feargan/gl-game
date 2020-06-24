@@ -21,15 +21,15 @@ void CScene::camera() const
 	gluLookAt(m_camera.x, m_camera.y, m_camera.z, m_lookAt.x, m_lookAt.y, m_lookAt.z, 0.0, 1.0, 0.0);
 }
 
-/*void CScene::follow(std::shared_ptr<ISceneObject>& obj, const CVec3d& offset)
+void CScene::follow(const ISceneObject& obj, const CVec3d& offset)
 {
-	m_lookAt = obj->getPos();
-	double yaw = obj->getYaw()*M_PI/180;
-	double pitch = obj->getPitch()*M_PI/180;
+	m_lookAt = obj.getPos();
+	double yaw = obj.getYaw()*M_PI / 180;
+	double pitch = obj.getPitch()*M_PI / 180;
 	m_camera = offset;
 	m_camera.rotateY(yaw);
 	m_camera += m_lookAt;
-}*/
+}
 
 void CScene::move(double deep, double horizontal)
 {
@@ -75,7 +75,7 @@ bool CScene::checkCollision(const ISceneObject & l) const
 	return false;
 }
 
-std::pair<CVec3d, CVec3d> CScene::getWorldRegion() const
+CBoxd CScene::getWorldRegion() const
 {
 	return { m_worldTop, m_worldBottom };
 }
@@ -84,6 +84,7 @@ void CScene::setWorldRegion(const CVec3d& worldTop, const CVec3d& worldBottom)
 {
 	m_worldTop = worldTop;
 	m_worldBottom = worldBottom;
+	m_worldSize = m_worldTop - m_worldBottom;
 	recreateSectors();
 }
 
@@ -105,19 +106,21 @@ void CScene::removeStativeObject(const ISceneObject& obj)
 {
 	for (auto &v : m_sectors)
 	{
-		v.erase(
-		std::remove_if(v.begin(), v.end(),
+		v.erase(std::remove_if(v.begin(), v.end(), 
 		[&obj](xstd::observer_ptr<const ISceneObject> p)
 		{
-			//wtf error czy warning?discarding return value of function with 'nodiscard' attribute warning ale przez to moze byc bug jakis
 			return p == &obj;
-		}),v.end()
+		}),
+		v.end()
 		);
 	}
 }
 
-void CScene::onObjectPosChanged(const ISceneObject& obj)
+void CScene::onCollisionUpdated(const ISceneObject& obj)
 {
+	if (!obj.isStative())
+		return;
+
 	removeStativeObject(obj);
 
 	auto sectors = getObjSectors(obj);
@@ -130,25 +133,27 @@ void CScene::onObjectPosChanged(const ISceneObject& obj)
 		for (int j = s.sectorzBegin; j <= s.sectorzEnd; j++)
 		{
 			int ind = m_sectorsPerEdge * i + j;
-			if(ind >= 0 && ind < m_sectors.size())
+			if(ind >= 0 && static_cast<unsigned int>(ind) < m_sectors.size())
 				m_sectors[ind].push_back(&obj);
 		}
 	}
+}
+
+void CScene::onStativityChanged(const ISceneObject& obj)
+{
+	if (obj.isStative())
+		onCollisionUpdated(obj); // +remove from dynamic
+	else
+		removeStativeObject(obj); // push to dynamic
 }
 
 void CScene::recreateSectors()
 {
 	m_sectors.clear();
 	m_sectors.resize(m_sectorsPerEdge*m_sectorsPerEdge);
-	// ^x, >z
-	// sector index: m_sectorsPerEdge*sector.x+sector.z gg
-	// relative: (objPos-worldBottom)
-	// world size: worldTop-worldBottom
-	// worldSize.x/relative.x == sector.x;
 	for (auto &p : m_objects)
 	{
-		if(p->isStative())
-			onObjectPosChanged(*p);
+		onCollisionUpdated(*p);
 	}
 }
 
@@ -157,7 +162,6 @@ std::optional<CScene::CSectorRange> CScene::getObjSectors(const ISceneObject& ob
 	if (obj.getColSpheres().empty())
 		return {};
 	CSectorRange sectors;
-	CVec3d worldSize = m_worldTop - m_worldBottom;
 	auto& colSpheres = obj.getColSpheres();
 	auto& first = colSpheres[0];
 
@@ -167,6 +171,7 @@ std::optional<CScene::CSectorRange> CScene::getObjSectors(const ISceneObject& ob
 		left{m_worldTop.x - first.pos.x - first.r},
 		right{m_worldTop.x - first.pos.x + first.r};
 
+	const CVec3d circle;
 	for (auto it = ++colSpheres.begin(); it!=colSpheres.end(); ++it)
 	{
 		auto s = *it;
@@ -182,10 +187,9 @@ std::optional<CScene::CSectorRange> CScene::getObjSectors(const ISceneObject& ob
 		if (relBottomRight.x > right)
 			right = relBottomRight.x;
 	}
-	sectors.sectorxBegin = static_cast<int>(worldSize.x / right);
-	sectors.sectorzBegin = static_cast<int>(worldSize.z / bottom);
-	sectors.sectorxEnd = static_cast<int>(worldSize.x / left);
-	sectors.sectorzEnd = static_cast<int>(worldSize.z / top);
-
+	sectors.sectorxBegin = static_cast<int>(m_worldSize.x / right);
+	sectors.sectorzBegin = static_cast<int>(m_worldSize.z / bottom);
+	sectors.sectorxEnd = static_cast<int>(m_worldSize.x / left);
+	sectors.sectorzEnd = static_cast<int>(m_worldSize.z / top);
 	return sectors;
 }

@@ -4,8 +4,8 @@
 #include <GL/GL.h>
 #include <GL/GLU.h>
 
-CLantern::CLantern() 
-	: ISceneObject(CVec3d(0.0, 0.0, 0.0), CVec3d(0.0, 0.0, 0.0), true),
+CLantern::CLantern(CScene& scene) 
+	: ISceneObject(scene, CVec3d(0.0, 0.0, 0.0), CVec3d(0.0, 0.0, 0.0), true),
 	m_height(15.0)
 {
 	addColSphere({ 0.1 });

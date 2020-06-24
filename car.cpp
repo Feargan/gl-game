@@ -8,8 +8,8 @@
 
 static constexpr double maxAngle = 30.0;
 
-CCar::CCar()
-	: m_steerAngle(0.0), m_force(0.0), m_vel(0.0)
+CCar::CCar(CScene& scene)
+	: ISceneObject(scene), m_steerAngle(0.0), m_force(0.0), m_vel(0.0)
 {
 	constexpr auto& p = g_carPhys;
 	// Kola i osie

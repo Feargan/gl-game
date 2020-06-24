@@ -2,6 +2,7 @@
 
 #include "vec3.h"
 #include "hitsphere.h"
+#include "box.h"
 #include "observer_ptr.h"
 
 #include <memory>
@@ -22,13 +23,14 @@ class ISceneObject
 
 	std::vector<CHitSphered> m_refSpheres;
 	std::vector<CHitSphered> m_spheres;
+	CBoxd m_approxHitbox;
 	
-	xstd::observer_ptr<CScene> m_scene;
+	CScene& m_scene;
 
 	bool m_wireframe;
 	bool m_stative;
 public:
-	ISceneObject(CVec3d pos = CVec3d(0.0, 0.0, 0.0), CVec3d rotation = CVec3d(0.0, 0.0, 0.0), bool stative = false);
+	ISceneObject(CScene& scene, CVec3d pos = CVec3d(0.0, 0.0, 0.0), CVec3d rotation = CVec3d(0.0, 0.0, 0.0), bool stative = false);
 	virtual ~ISceneObject();
 
 	ISceneObject(const ISceneObject& r);
@@ -58,13 +60,13 @@ public:
 
 	void setWireframe(bool wireframe);
 
-	void setScene(CScene& scene);
-	xstd::observer_ptr<const CScene> getScene() const;
+	xstd::observer_ptr<CScene> getScene() const;
 
 	void addColSphere(const CHitSphered& sphere);
 	bool against(const ISceneObject& r) const;
 	bool checkCollision() const;
 	const std::vector<CHitSphered>& getColSpheres() const;
+	const CBoxd& getApproximatedHitbox() const;
 
 	void update();
 	void render() const;
@@ -76,7 +78,7 @@ protected:
 	xstd::observer_ptr<T> createComponent(Cs... args)
 	{
 		//static_assert(std::is_base_of<ISceneObject, T>::value, "T is not a scene object");
-		m_children.emplace_back(std::make_unique<T>(args...));
+		m_children.emplace_back(std::make_unique<T>(m_scene, args...));
 		return static_cast<T*>(m_children.back().get());
 	}
 

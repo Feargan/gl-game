@@ -6,25 +6,19 @@
 #include <GL/GLU.h>
 
 
-ISceneObject::ISceneObject(CVec3d pos, CVec3d rotation, bool stative)
-	: m_pos(pos), m_rotation(rotation), m_scene(nullptr), m_wireframe(false), m_stative(stative)
+ISceneObject::ISceneObject(CScene& scene, CVec3d pos, CVec3d rotation, bool stative)
+	: m_pos(pos), m_rotation(rotation), m_scene(scene), m_wireframe(false), m_stative(stative)
 {
-
+	m_scene.onStativityChanged(*this);
 }
 
 ISceneObject::~ISceneObject()
 {
 }
 
-void ISceneObject::setScene(CScene & scene)
+xstd::observer_ptr<CScene> ISceneObject::getScene() const
 {
-	m_scene = &scene;
-	updateCollision();
-}
-
-xstd::observer_ptr<const CScene> ISceneObject::getScene() const
-{
-	return m_scene;
+	return &m_scene;
 }
 
 void ISceneObject::update()
@@ -53,16 +47,44 @@ void ISceneObject::render() const
 
 void ISceneObject::updateCollision()
 {
-	for (unsigned int i = 0; i < m_refSpheres.size(); i++)
+	if (!m_spheres.empty())
 	{
-		auto newPos = CVec3d(m_refSpheres[i].pos);
-		newPos.rotateY(m_rotation.y / 180 * M_PI);
-		newPos.rotateX(m_rotation.x / 180 * M_PI);
-		newPos.rotateZ(m_rotation.z / 180 * M_PI);
-		m_spheres[i].pos = newPos+m_pos;
+		auto& first = m_spheres[0];
+		for (unsigned int i = 0; i < m_refSpheres.size(); i++)
+		{
+			auto newPos = CVec3d(m_refSpheres[i].pos);
+			newPos.rotateY(m_rotation.y / 180 * M_PI);
+			newPos.rotateX(m_rotation.x / 180 * M_PI);
+			newPos.rotateZ(m_rotation.z / 180 * M_PI);
+			
+
+			/*double
+				top{ m_worldTop.z - first.pos.z - first.r },
+				bottom{ m_worldTop.z - first.pos.z + first.r },
+				left{ m_worldTop.x - first.pos.x - first.r },
+				right{ m_worldTop.x - first.pos.x + first.r };
+
+			const CVec3d circle;
+			for (auto it = ++colSpheres.begin(); it != colSpheres.end(); ++it)
+			{
+				auto s = *it;
+				CVec3d relTopLeft = m_worldTop - s.pos - CVec3d{ s.r, 0.0, s.r };
+				CVec3d relBottomRight = m_worldTop - s.pos + CVec3d{ s.r, 0.0, s.r };
+
+				if (relTopLeft.z < top)
+					top = relTopLeft.z;
+				if (relBottomRight.z > bottom)
+					bottom = relBottomRight.z;
+				if (relTopLeft.x < left)
+					left = relTopLeft.x;
+				if (relBottomRight.x > right)
+					right = relBottomRight.x;
+			}*/
+
+			m_spheres[i].pos = newPos + m_pos;
+		}
 	}
-	if(m_scene)
-		m_scene->onObjectPosChanged(*this);
+	m_scene.onCollisionUpdated(*this);
 }
 
 // ... gettery i settery ...
@@ -140,8 +162,11 @@ void ISceneObject::setWireframe(bool wireframe)
 
 void ISceneObject::setStative(bool stative)
 {
-	m_stative = stative;
-	updateCollision();
+	if (m_stative != stative)
+	{
+		m_stative = stative;
+		m_scene.onStativityChanged(*this);
+	}
 }
 
 bool ISceneObject::isStative() const
@@ -173,11 +198,14 @@ bool ISceneObject::against(const ISceneObject & r) const
 	return false;
 }
 
+const CBoxd& ISceneObject::getApproximatedHitbox() const
+{
+	return m_approxHitbox;
+}
+
 bool ISceneObject::checkCollision() const
 {
-	if(!m_scene)
-		return false;
-	return m_scene->checkCollision(*this);
+	return m_scene.checkCollision(*this);
 }
 
 const std::vector<CHitSphered>& ISceneObject::getColSpheres() const

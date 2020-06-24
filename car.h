@@ -36,7 +36,7 @@ class CCar :
 
 	std::array<xstd::observer_ptr<CCylinder>, 4> m_tires;
 public:
-	CCar();
+	CCar(CScene& scene);
 	virtual ~CCar();
 
 	void setSteer(double angle);

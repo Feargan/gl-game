@@ -7,7 +7,7 @@ class CTrafficCone :
 	double m_height;
 	double m_color[3];
 public:
-	CTrafficCone();
+	CTrafficCone(CScene& scene);
 	virtual ~CTrafficCone();
 
 	void setHeight(double height);

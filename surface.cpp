@@ -4,8 +4,8 @@
 #include <GL/GL.h>
 #include <GL/GLU.h>
 
-CSurface::CSurface(int sizeX, int sizeY)
-	: ISceneObject(CVec3d(0.0, 0.0, 0.0), CVec3d(0.0, 0.0, 0.0), true)
+CSurface::CSurface(CScene& scene, int sizeX, int sizeY)
+	: ISceneObject(scene, CVec3d(0.0, 0.0, 0.0), CVec3d(0.0, 0.0, 0.0), true)
 {
 	m_sizeX = sizeX;
 	m_sizeY = sizeY;

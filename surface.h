@@ -16,7 +16,7 @@ class CSurface :
 
 	std::vector <std::vector<CVec3d>> m_vertices;
 public:
-	CSurface(int sizeX, int sizeY);
+	CSurface(CScene& scene, int sizeX, int sizeY);
 	virtual ~CSurface();
 
 	void setDistortion(double distortionUp, double distortionRight, double distortionDown, double distortionLeft);
