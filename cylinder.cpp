@@ -9,7 +9,7 @@
 CCylinder::CCylinder(CScene& scene, CVec3d pos, double height, double radius, CVec3d rotation)
 	: ISceneObject(scene, pos, rotation, false), m_radius(radius), m_height(height)
 {
-	createComponent<CCuboid>()->setSize(30, 0.03, 0.03);
+	//createComponent<CCuboid>()->setSize(30, 0.03, 0.03);
 }
 
 CCylinder::~CCylinder()
