@@ -36,7 +36,7 @@ CCar::CCar(CScene& scene)
 	addColSphere(CHitSphered(colRadius, CVec3d(p.lengthTires + p.carFrontExt - p.widthBetweenTires / 2, 0, 0)));
 	addColSphere(CHitSphered(colRadius, CVec3d((p.lengthTires + p.carFrontExt - p.widthBetweenTires / 2)/2, 0, 0)));
 
-	auto col1 = createComponent<CCylinder>(CVec3d(0, 2.3, 0), 2.3, colRadius);
+	/*auto col1 = createComponent<CCylinder>(CVec3d(0, 2.3, 0), 2.3, colRadius);
 	auto col2 = createComponent<CCylinder>(CVec3d(p.lengthTires + p.carFrontExt - p.widthBetweenTires / 2, 2.3, 0), 2.3, colRadius);
 	auto col3 = createComponent<CCylinder>(CVec3d((p.lengthTires + p.carFrontExt - p.widthBetweenTires / 2) / 2, 2.3, 0), 2.3, colRadius);
 
@@ -44,7 +44,7 @@ CCar::CCar(CScene& scene)
 	{
 		c->setPitch(-90);
 		c->setWireframe(true);
-	}
+	}*/
 
 }
 
