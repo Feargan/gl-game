@@ -20,6 +20,7 @@ class CScene
 	CVec3d m_worldTop;
 	CVec3d m_worldBottom;
 	CVec3d m_worldSize;
+	CVec3d m_sectorSize;
 
 	struct CSectorRange
 	{

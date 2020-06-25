@@ -151,6 +151,7 @@ void CScene::recreateSectors()
 {
 	m_sectors.clear();
 	m_sectors.resize(m_sectorsPerEdge*m_sectorsPerEdge);
+	m_sectorSize = { m_worldSize.x / m_sectorsPerEdge, 0.0, m_worldSize.z / m_sectorsPerEdge };
 	for (auto &p : m_objects)
 	{
 		onCollisionUpdated(*p);
@@ -165,9 +166,9 @@ std::optional<CScene::CSectorRange> CScene::getObjSectors(const ISceneObject& ob
 	auto& hb = obj.getApproximatedHitbox();
 	auto relBot = m_worldTop - (obj.getPos() + hb.bottom);
 	auto relTop = m_worldTop - (obj.getPos() + hb.top);
-	sectors.xBegin = static_cast<int>(m_worldSize.x / (relBot.x));
-	sectors.zBegin = static_cast<int>(m_worldSize.z / (relBot.z));
-	sectors.xEnd = static_cast<int>(m_worldSize.x / (relTop.x));
-	sectors.zEnd = static_cast<int>(m_worldSize.z / (relTop.z));
+	sectors.xBegin = static_cast<int>(relTop.x / m_sectorSize.x);
+	sectors.zBegin = static_cast<int>(relTop.z / m_sectorSize.z);
+	sectors.xEnd = static_cast<int>(relBot.x / m_sectorSize.x);
+	sectors.zEnd = static_cast<int>(relBot.z / m_sectorSize.z);
 	return sectors;
 }
